@@ -142,7 +142,9 @@ layout; they don't reproduce Roland's logo or model lettering.
 
 - Tested with XP-80 files (`SV00`, `XP-80 0105 1.7`) and Fantom-X files (`SV03`,
   `MC-80      1.1.1`). Other Roland sequencers that write `.SVQ` files may differ: MC-80 and
-  Fantom-S files will probably work, while MC-50mkII and JV-1000 files are untested.
+  Fantom-S files will probably work, while files from the original Fantom (FA-76), MC-50mkII and
+  JV-1000 are untested. At least one other variant of the format exists, probably the original
+  Fantom's. Sample files from these instruments would help.
 - Fantom-X Patch SysEx is verified byte-for-byte against Fantom-X Patch dumps. Rhythm Set SysEx
   uses the same rules and decodes plausibly (all names readable, all values in range), but no
   Rhythm Set dump was available to verify it. The Fantom-X Performance (Common, three MFX,
@@ -160,6 +162,10 @@ layout; they don't reproduce Roland's logo or model lettering.
   to use the same record, since none of the sample XP songs contain one. The XP-80 manual
   confirms phrase tracks can hold Pattern Call messages; one XP song with six patterns
   holds copies of four of them in its tracks rather than calls.
+- The RPS key assignments shown in Pattern Tracks (pattern, playback mode, mute group) are read
+  from one XP and one Fantom-X song. The playback-mode and mute-group values follow the manual's
+  order and fit those songs, but haven't been checked on an instrument. Pattern numbers (which
+  can skip, as on the instrument) and pattern names are consistent across every sample.
 - The meaning of the track Output bits comes from one Fantom-X song plus the defaults in
   all the others; it's consistent with everything in that song, but no other sample changes it.
 - For Fantom-X songs saved in Patch mode, the keyboard and pad receive channels are system
@@ -174,6 +180,12 @@ layout; they don't reproduce Roland's logo or model lettering.
   may show "Rhodes" where Roland's revised lists say "EP"; a song shows its own saved name anyway.
 - Bank Select for PCM card patches (MSB 83) comes from JV-series documentation and hasn't
   been checked on an XP-80. None of the sample songs use a PCM card.
-- The `SYSa`/`SYSb` system blocks are not decoded; they don't affect playback.
+- The XP's `SYSa`/`SYSb` blocks (the System settings saved with a song) are mostly decoded but
+  aren't used, since they don't affect playback. The System Common settings, pedals and scale
+  tunes are mapped from the manual's parameter list (checked for consistency across 75 copies;
+  no System dump was available to verify them byte for byte), and the arpeggio settings are
+  inferred. A 10-bit setting and a 26-byte tail at the end are still unidentified (probably
+  settings with no SysEx address, such as LCD contrast, Device ID or the sequencer's quantize
+  settings). See `docs/SVQ-Format.md`.
 - Dragging has been tested with the Finder and Logic Pro on macOS 26. On macOS 13 the app falls
   back to an older drag method, which hasn't been tried.
