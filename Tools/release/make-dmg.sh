@@ -64,7 +64,7 @@ team="$(sed -n 's/.*(\([A-Z0-9]*\))$/\1/p' <<< "$id")"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
-echo "Building $(git -C "$root" rev-parse --short HEAD) signed as $id…"
+echo "Building $(git -C "$root" rev-parse --short HEAD) signed as ${id}…"
 xcodebuild -quiet -project "$root/$name.xcodeproj" -scheme "$name" -configuration Release \
   -destination 'generic/platform=macOS' -derivedDataPath "$work/dd" \
   CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$id" DEVELOPMENT_TEAM="$team" \
