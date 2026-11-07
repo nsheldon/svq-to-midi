@@ -1,0 +1,21 @@
+.DS_Store
+.build/
+.swiftpm/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+__pycache__/
+
+# Copyrighted reference material: kept locally, not committed
+Reference Material/*.jpg
+Reference Material/SR-JV80 Lists/*.pdf
+Reference Material/SR-JV80 Lists/lists/
+Reference Material/SRX Lists/dl/
+Reference Material/Fantom-X Map/dl/
+
+# Test fixtures are the author's own songs, MIDI exports and patch dumps: kept locally, not committed
+SVQKit/Tests/SVQKitTests/Fixtures/*
+!SVQKit/Tests/SVQKitTests/Fixtures/README.md
+
+# Personal notes for Claude Code (local paths)
+CLAUDE.local.md
