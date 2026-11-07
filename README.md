@@ -102,6 +102,9 @@ lists where they came from.
 
 ## Distribution checklist
 
+- `Tools/release/make-dmg.sh` builds the downloadable copy: Developer ID signed, notarized and
+  stapled, in a DMG with the license and an Applications link. Run it with `check` first; it
+  needs a Developer ID Application certificate and a `notarytool` login (`NOTARY_PROFILE`).
 - In **Signing & Capabilities**, choose your team. The project is set to sign locally
   ("Sign to Run Locally") until you do.
 - The app is sandboxed and uses only user-selected file access. Hardened Runtime is on, so it

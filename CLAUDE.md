@@ -45,7 +45,11 @@ cd SVQKit && swift test                          # format/converter tests
 swift run svq2mid --info <file.svq | folder>     # inspect songs and Performance parts
 swift run svq2mid -o <outdir> <files/folders>    # batch convert
 xcodebuild -project "SVQ to MIDI.xcodeproj" -scheme "SVQ to MIDI" -configuration Debug -derivedDataPath <scratch>/dd build
+NOTARY_PROFILE=<name> Tools/release/make-dmg.sh "beta 1"   # signed, notarized DMG in build/release (clean tree only)
 ```
+
+Releases go on GitHub (`origin` = github.com/nsheldon/svq-to-midi, `gh` is signed in) as
+pre-releases while in beta; commits use the noreply email set in the repo's git config.
 
 This Mac runs macOS 26: legacy `.appiconset` icons get shrunk into a gray container, so the icon
 must stay an Icon Composer `.icon`. `NSWorkspace.icon(forFile:)` caches by path — copy the app to a

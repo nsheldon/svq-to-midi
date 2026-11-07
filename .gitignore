@@ -19,3 +19,6 @@ SVQKit/Tests/SVQKitTests/Fixtures/*
 
 # Personal notes for Claude Code (local paths)
 CLAUDE.local.md
+
+# Release builds (Tools/release/make-dmg.sh)
+/build/
