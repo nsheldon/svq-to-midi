@@ -68,7 +68,7 @@ echo "Building $(git -C "$root" rev-parse --short HEAD) signed as ${id}…"
 xcodebuild -quiet -project "$root/$name.xcodeproj" -scheme "$name" -configuration Release \
   -destination 'generic/platform=macOS' -derivedDataPath "$work/dd" \
   CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$id" DEVELOPMENT_TEAM="$team" \
-  ENABLE_HARDENED_RUNTIME=YES OTHER_CODE_SIGN_FLAGS=--timestamp build
+  ENABLE_HARDENED_RUNTIME=YES CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO OTHER_CODE_SIGN_FLAGS=--timestamp build
 app="$work/dd/Build/Products/Release/$name.app"
 plist="$app/Contents/Info.plist"
 version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$plist")"
