@@ -62,7 +62,10 @@ fi
 id="$(identity)"
 team="$(sed -n 's/.*(\([A-Z0-9]*\))$/\1/p' <<< "$id")"
 work="$(mktemp -d)"
-trap 'rm -rf "$work"' EXIT
+lsregister=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+# Xcode registers the app it builds with Launch Services; unregister the temporary copy before
+# deleting it, or macOS may later try to open the deleted copy ("its executable is missing").
+trap '"$lsregister" -u "$work/dd/Build/Products/Release/$name.app" 2>/dev/null; rm -rf "$work"' EXIT
 
 echo "Building $(git -C "$root" rev-parse --short HEAD) signed as ${id}…"
 xcodebuild -quiet -project "$root/$name.xcodeproj" -scheme "$name" -configuration Release \
