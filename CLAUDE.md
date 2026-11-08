@@ -62,6 +62,11 @@ with `open -a <app> --args -ShowAboutOnLaunch YES`. To check the UI, launch with
 `open -a <app> file.svq` and capture the window with `screencapture -l<windowID>` (get the ID
 from `CGWindowListCopyWindowInfo`). Wait ~5 s after launch or the capture is a placeholder.
 
+## Website
+
+The promotional page and its upload script are kept out of the repository (git-ignored); how
+they work and how to update them is in `CLAUDE.local.md`.
+
 ## Reference material (user's files)
 
 - The owner's songs, MIDI exports, manuals and backup folders are listed in `CLAUDE.local.md`

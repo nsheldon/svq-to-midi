@@ -22,3 +22,7 @@ CLAUDE.local.md
 
 # Release builds (Tools/release/make-dmg.sh)
 /build/
+
+# The promotional website and its upload script (kept local; see CLAUDE.local.md)
+/Website/
+/Tools/website/
