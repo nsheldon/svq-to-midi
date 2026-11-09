@@ -208,11 +208,11 @@ final class ConversionTests: XCTestCase {
         }
         XCTAssertEqual(notesAndBends(ours), notesAndBends(reference))
 
-        // All 17 Performance messages are present, in order, inside the lead-in.
+        // The saved System settings, then all 17 Performance messages, in order, inside the lead-in.
         let sysEx = ours.allEvents.compactMap { e -> (Int, [UInt8])? in
             if case .sysEx(let b) = e.message { return (e.tick, b) } else { return nil }
         }
-        XCTAssertEqual(sysEx.map(\.1), svq.performance!.sysExMessages())
+        XCTAssertEqual(sysEx.map(\.1), try XCTUnwrap(svq.xpSystem).sysExMessages() + svq.performance!.sysExMessages())
         XCTAssert(sysEx.allSatisfy { $0.0 < 1536 })
 
         // Patch selection for Part 4 (channel 4): GM 078 → Bank 81/3, Program 77.
@@ -239,7 +239,7 @@ final class ConversionTests: XCTestCase {
         XCTAssertEqual(midi.tracks.count, plain.tracks.count + 1)
         let setup = midi.tracks[1]
         XCTAssertEqual(setup.compactMap { e -> [UInt8]? in if case .sysEx(let b) = e.message { return b } else { return nil } },
-                       svq.performance!.sysExMessages())
+                       try XCTUnwrap(svq.xpSystem).sysExMessages() + svq.performance!.sysExMessages())
         // The XP-80 Performance messages stay 40 ms apart, and the setup track holds nothing else.
         let sysExTicks = setup.compactMap { e -> Int? in if case .sysEx = e.message { return e.tick } else { return nil } }
         let usPerTick = Double(svq.initialTempo) / Double(svq.resolution)
@@ -270,8 +270,9 @@ final class ConversionTests: XCTestCase {
 
 final class SyntheticFileTests: XCTestCase {
     /// Builds a minimal SVQ: header, records, then nothing else.
-    private func makeSVQ(name: String, records: [[UInt8]]) -> Data {
-        var header: [UInt8] = Array("SV00".utf8) + [0x00, 0x60] + [UInt8](repeating: 0, count: 8) + [0xFF]
+    private func makeSVQ(name: String, records: [[UInt8]], signature: String = "SV00", resolution: Int = 96) -> Data {
+        var header: [UInt8] = Array(signature.utf8) + MIDIFileWriter.bigEndian(resolution, bytes: 2)
+            + [UInt8](repeating: 0, count: 8) + [0xFF]
         header += Array("XP-80 0105 1.7  ".utf8)
         header += [UInt8(name.utf8.count)] + Array(name.utf8) + [0x00]
         header += [UInt8](repeating: 0, count: 8)
@@ -355,5 +356,53 @@ final class SyntheticFileTests: XCTestCase {
         XCTAssertThrowsError(try SVQFile(data: Data([0, 1]))) { error in
             XCTAssertEqual(error as? SVQError, .tooShort)
         }
+    }
+
+    // MARK: Untested format versions
+
+    /// A Fantom-X-layout record (12 bytes): u16 step, type, channel, track, 7 data bytes.
+    private func fx(_ step: Int, _ type: UInt8, _ channel: UInt8, _ track: UInt8, _ data: [UInt8]) -> [UInt8] {
+        MIDIFileWriter.bigEndian(step, bytes: 2) + [type, channel, track] + data + [UInt8](repeating: 0, count: 7 - data.count)
+    }
+
+    func testUnknownVersionInTheFantomXLayoutIsReadLikeOne() throws {
+        let data = makeSVQ(name: "V2", records: [
+            fx(0, 0x83, 0, 0, [0, 0, 0, 0x00, 0x02, 0x49, 0xF0]),       // 150000 (u32 in bytes 8-11)
+            fx(0, 0x84, 0, 0, [0, 0, 0, 0x00, 0x00, 0x17, 0x70]),       // / 6000 ticks at 480 → 500000 µs
+            fx(480, 0x3C, 1, 0, [100, 64, 0, 0x00, 0x00, 0x01, 0xE0]),     // tick 0: C4, ch 2, gate 480
+            fx(0, 0x8E, 0, 0, []),                                          // tick 480: end of track 1
+            fx(0, 0x8F, 0, 0, []),
+        ], signature: "SV04", resolution: 480)
+        let svq = try SVQFile(data: data)
+        XCTAssertEqual(svq.formatVersion, 4)
+        XCTAssertFalse(svq.isKnownFormatVersion)
+        XCTAssertEqual(svq.variant, .fantomX)
+        XCTAssertEqual(svq.formatDescription, "SVQ version 4 (untested)")
+        XCTAssertTrue(svq.warnings.contains { $0.contains("\"SV04\"") && $0.contains("Fantom-S/X") })
+        XCTAssertEqual(svq.initialTempo, 500_000)
+        XCTAssertEqual(svq.events.last, SVQEvent(tick: 0, track: 0, kind: .note(channel: 1, key: 60, velocity: 100, releaseVelocity: 64, gate: 480)))
+        XCTAssertEqual(svq.songLength, 480)
+    }
+
+    func testUnknownVersionInTheXPLayoutIsReadLikeOne() throws {
+        let data = makeSVQ(name: "V2", records: [
+            [0x00, 0x83, 0, 0, 0x00, 0x02, 0x49, 0xF0],
+            [0x00, 0x84, 0, 0, 0x00, 0x00, 0x04, 0xB0],
+            [0x60, 0x3C, 2, 1, 100, 64, 0x00, 0x60],
+            [0x00, 0x8E, 0, 1, 0, 0, 0, 0],
+            [0x00, 0x8F, 0, 0, 0, 0, 0, 0],
+        ], signature: "SV04")
+        let svq = try SVQFile(data: data)
+        XCTAssertEqual(svq.variant, .xp)
+        XCTAssertEqual(svq.formatVersion, 4)
+        XCTAssertEqual(svq.events.last, SVQEvent(tick: 0, track: 1, kind: .note(channel: 2, key: 60, velocity: 100, releaseVelocity: 64, gate: 96)))
+    }
+
+    func testTestedVersionsAreReadAsBefore() throws {
+        let svq = try SVQFile(data: makeSVQ(name: "V0", records: [[0x00, 0x8F, 0, 0, 0, 0, 0, 0]]))
+        XCTAssertEqual(svq.formatVersion, 0)
+        XCTAssertTrue(svq.isKnownFormatVersion)
+        XCTAssertEqual(svq.formatDescription, "XP-50/60/80")
+        XCTAssertFalse(svq.warnings.contains { $0.contains("hasn't been seen") })
     }
 }

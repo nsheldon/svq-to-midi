@@ -213,7 +213,7 @@ struct EmptyStateView: View {
                 .foregroundStyle(.secondary)
             Text("Drop SVQ files or folders here")
                 .font(.title2)
-            Text("Converts Roland XP-50, XP-60, XP-80 and Fantom-X sequencer songs to Standard MIDI Files,\nincluding each Part's patch selection from the song's saved Performance.")
+            Text("Converts Roland XP-50, XP-60, XP-80, Fantom, Fantom-S, Fantom-X and MC-80 sequencer songs to Standard MIDI Files,\nincluding each Part's patch selection from the song's saved Performance.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
             Button("Choose Files…") { model.showOpenPanel() }

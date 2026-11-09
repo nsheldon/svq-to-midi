@@ -55,6 +55,8 @@ public struct PerformanceSetup: Equatable, Sendable {
     public var parts: [SetupPart]
     /// An explanation shown with the parts, e.g. for songs saved in Patch mode.
     public var note: String?
+    /// What the setup is called on the instrument: "Performance", or "Multitimbre" on the original Fantom.
+    public var kind = "Performance"
 }
 
 extension SVQFile {
@@ -69,6 +71,7 @@ extension SVQFile {
                           displayName: part.patch.displayName, xpPatch: part.patch, storedBank: nil)
             })
         }
+        if let fa76 = fa76Setup { return fa76PerformanceSetup(fa76) }
         guard let fantom = fantomPerformance else { return nil }
         func setupPart(_ part: FantomPart, label: String, mixer: Bool) -> SetupPart {
             var setup = SetupPart(number: part.number, label: label, receiveSwitch: part.receiveSwitch, midiChannel: part.midiChannel,
@@ -80,20 +83,54 @@ extension SVQFile {
             setup.hasSavedSound = fantom.savedSound(of: part) != nil
             return setup
         }
+        let model = fantom.isFantomS ? "Fantom-S" : "Fantom-X"
         switch fantom.soundMode {
         case .patch? where fantom.keyboardPart != nil && fantom.padPart != nil:
             let keyboard = fantom.keyboardPart!, pad = fantom.padPart!
             return PerformanceSetup(
-                name: keyboard.name ?? "", instrument: "Fantom-X Patch mode",
+                name: keyboard.name ?? "", instrument: "\(model) Patch mode",
                 parts: [setupPart(keyboard, label: "Kbd", mixer: false), setupPart(pad, label: "Pad", mixer: false)],
                 note: "This song was saved in Patch mode, so it plays the keyboard Patch and the pad sound rather than the Performance. "
-                    + "Their receive channels aren't saved with the song, so the Fantom-X defaults (1 and 10) are used.")
+                    + "Their receive channels aren't saved with the song, so the Fantom-X\u{2019}s defaults (1 and 10) are used.")
         case .gm1?, .gm2?, .gs?:
-            return PerformanceSetup(name: "", instrument: "Fantom-X GM/GS mode", parts: [],
+            return PerformanceSetup(name: "", instrument: "\(model) GM/GS mode", parts: [],
                                     note: "This song was saved in GM/GS mode, so it relies on its own program changes.")
         default:
-            return PerformanceSetup(name: fantom.name, instrument: "Fantom-X",
+            return PerformanceSetup(name: fantom.name, instrument: model,
                                     parts: fantom.parts.map { setupPart($0, label: "\($0.number)", mixer: true) })
+        }
+    }
+
+    /// The original Fantom's (FA-76) setup: the Multitimbre (its mode for sequencing), the
+    /// Performance, or the Patch, depending on the Sound Mode the song was saved in.
+    private func fa76PerformanceSetup(_ fa76: FA76Setup) -> PerformanceSetup {
+        func setupPart(_ part: FA76Part, label: String, channel: Int? = nil, mixer: Bool = true) -> SetupPart {
+            SetupPart(number: part.number, label: label, receiveSwitch: part.receiveSwitch,
+                      midiChannel: channel ?? part.midiChannel, level: part.level, pan: part.pan,
+                      reverbSendLevel: part.reverbSendLevel, chorusSendLevel: part.chorusSendLevel,
+                      isRhythmSet: part.isRhythmSet, hasMixerSettings: mixer, displayName: part.displayName,
+                      xpPatch: nil,
+                      storedBank: BankSelect(msb: UInt8(part.bankMSB & 0x7F), lsb: UInt8(part.bankLSB & 0x7F),
+                                             program: UInt8(part.program & 0x7F)))
+        }
+        switch fa76.soundMode {
+        case .patch?:
+            guard let patch = fa76.patch else { fallthrough }
+            return PerformanceSetup(
+                name: patch.displayName, instrument: "Fantom Patch mode",
+                parts: [setupPart(patch, label: "Patch", channel: 0, mixer: false)],
+                note: "This song was saved in Patch mode, so it plays one Patch. Its receive channel is a system "
+                    + "setting that isn't saved with the song, so channel 1 (the Fantom's default) is used.")
+        case .gm1?, .gm2?, .gs?:
+            return PerformanceSetup(name: "", instrument: "Fantom GM/GS mode", parts: [],
+                                    note: "This song was saved in GM/GS mode, so it relies on its own program changes.")
+        case .performance? where !fa76.performanceParts.isEmpty:
+            return PerformanceSetup(name: fa76.performanceName, instrument: "Fantom",
+                                    parts: fa76.performanceParts.map { setupPart($0, label: "\($0.number)") })
+        default:
+            return PerformanceSetup(name: fa76.multitimbreName, instrument: "Fantom",
+                                    parts: fa76.multitimbreParts.map { setupPart($0, label: "\($0.number)") },
+                                    kind: "Multitimbre")
         }
     }
 }

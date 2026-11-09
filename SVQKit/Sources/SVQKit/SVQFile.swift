@@ -201,7 +201,9 @@ public enum SVQTrackOutput: Equatable, Sendable {
 public enum SVQVariant: String, Sendable {
     /// XP-50/60/80: 8-byte records with an 8-bit step.
     case xp
-    /// Fantom-X (MC-80 sequencer engine): 12-byte records with a 16-bit step and 32-bit gate.
+    /// Fantom-S and Fantom-X (MC-80 sequencer engine): 12-byte records with a 16-bit step and
+    /// 32-bit gate. The Fantom-S's songs (model "MC-80 1.2") have the same layout and data blocks as
+    /// the Fantom-X's ("MC-80 1.1.1"), as Roland's Fantom-S demo songs show.
     case fantomX
 
     var recordLayout: (size: Int, stepBytes: Int, dataOffset: Int) {
@@ -214,7 +216,7 @@ public enum SVQVariant: String, Sendable {
     public var displayName: String {
         switch self {
         case .xp: return "XP-50/60/80"
-        case .fantomX: return "Fantom-X"
+        case .fantomX: return "Fantom-S/X"
         }
     }
 }
@@ -238,8 +240,23 @@ public struct SVQFile: Sendable {
     public var patterns: [SVQPattern]
     /// Raw data blocks from the embedded "SVD" directory, keyed by tag (e.g. "PRFa", "SYSa", "SYSb").
     public var dataBlocks: [String: [UInt8]]
-    /// Which instrument family wrote the file.
+    /// Which instrument family's record layout the file uses.
     public var variant: SVQVariant
+    /// The format version in the signature: 0 for "SV00" (XP-50/60/80), 2 for "SV02" (the original
+    /// Fantom FA-76 and the MC-80), 3 for "SV03" (Fantom-S and Fantom-X).
+    public var formatVersion: Int
+    /// Whether the format version is one whose layout is known (0, 2 or 3). "SV02" was worked out from
+    /// Roland's own SV02 songs inside the Fantom's firmware; no MIDI export of them was available.
+    public var isKnownFormatVersion: Bool { [0, 2, 3].contains(formatVersion) }
+    /// The instrument family, e.g. "Fantom-S/X", or "SVQ version 4 (untested)" for an unknown version.
+    public var formatDescription: String {
+        switch formatVersion {
+        case 0: return "XP-50/60/80"
+        case 2: return "Fantom/MC-80"
+        case 3: return "Fantom-S/X"
+        default: return "SVQ version \(formatVersion) (untested)"
+        }
+    }
     /// Each phrase track's Output setting (tracks 1-16).
     public var trackOutputs: [SVQTrackOutput]
     /// Phrase tracks (0-15) that were probably muted when the song was saved. **Unconfirmed**: read
@@ -251,6 +268,10 @@ public struct SVQFile: Sendable {
     public var performance: XPPerformance?
     /// The Fantom-X Performance saved with the song, if present.
     public var fantomPerformance: FantomPerformance?
+    /// The original Fantom's (FA-76) saved Setup, Performance and Multitimbre ("SV02" files).
+    public var fa76Setup: FA76Setup?
+    /// The XP's saved System settings ("SYSb", or "SYSa" in older files).
+    public var xpSystem: XPSystem?
     /// The song's pattern calls (Fantom-X), which were expanded into the song's events.
     public var patternCalls: [SVQPatternCall]
     /// Number of pattern-call events (Fantom-X phrase references) that were expanded into the song.
@@ -263,6 +284,18 @@ public struct SVQFile: Sendable {
 
     public init(contentsOf url: URL) throws {
         try self.init(data: Data(contentsOf: url))
+    }
+
+    /// The Fantom-X audio-track file saved beside a song (Fantom-X system 2.x, the Audio Track
+    /// Expansion): the same name with the extension `.SVA`, or nil if there is none. It holds the
+    /// audio tracks' settings and sample events (references to samples), which aren't converted.
+    public static func audioTrackFile(forSongAt url: URL) -> URL? {
+        let base = url.deletingPathExtension()
+        for ext in ["SVA", "sva", "Sva"] {
+            let candidate = base.appendingPathExtension(ext)
+            if FileManager.default.fileExists(atPath: candidate.path) { return candidate }
+        }
+        return nil
     }
 
     public init(data: Data) throws {
@@ -342,15 +375,36 @@ public struct SVQFile: Sendable {
             rpsAssignments = byKey.values.sorted { $0.key < $1.key }
         }
 
-        let variant: SVQVariant = (b[4] == 0x30 && b[5] == 0x30) ? .xp : .fantomX
-        if variant == .fantomX, !(b[4] == 0x30 && b[5] == 0x33) {
-            warnings.append("Unrecognized SVQ version \"SV\(Character(UnicodeScalar(b[4])))\(Character(UnicodeScalar(b[5])))\"; reading it like a Fantom-X file.")
+        let declaredLength = Int(b[dataStart - 4]) << 24 | Int(b[dataStart - 3]) << 16
+            | Int(b[dataStart - 2]) << 8 | Int(b[dataStart - 1])
+
+        // "SV00" is the XP's layout, "SV02" the original Fantom's and MC-80's, "SV03" the Fantom-S/X's.
+        // Any other version is read with whichever record
+        // layout fits its data best.
+        let version = (0x30 ... 0x39).contains(b[4]) && (0x30 ... 0x39).contains(b[5])
+            ? Int(b[4] - 0x30) * 10 + Int(b[5] - 0x30) : -1
+        formatVersion = version
+        // Whose sound-settings blocks this decoder knows: the XP's and the Fantom-S/X's.
+        let tested = version == 0 || version == 3
+        let variant: SVQVariant
+        switch version {
+        case 0: variant = .xp
+        // "SV02" (original Fantom, MC-80) has the Fantom-S/X's 12-byte records and the XP's u16
+        // lengths after them (see the pattern names below).
+        case 2, 3: variant = .fantomX
+        default:
+            let xpFit = SVQFile.layoutFit(b, from: dataStart, length: declaredLength, layout: SVQVariant.xp.recordLayout)
+            let fantomFit = SVQFile.layoutFit(b, from: dataStart, length: declaredLength, layout: SVQVariant.fantomX.recordLayout)
+            // A tie goes to the Fantom-X layout unless the file is at the XP's 96 ticks a quarter.
+            variant = xpFit > fantomFit || (xpFit == fantomFit && resolution <= 96) ? .xp : .fantomX
+            let signature = String(decoding: b[2 ..< 6], as: UTF8.self)
+            warnings.append("This file is SVQ format \"\(signature)\", a version that hasn't been seen before (the "
+                + "known ones are SV00 from the XP, SV02 from the original Fantom and MC-80, and SV03 from the "
+                + "Fantom-S/X). It was read like \(variant == .xp ? "an XP" : "a Fantom-S/X") file, whose layout "
+                + "fits its data best; please report anything that converts wrongly.")
         }
         self.variant = variant
         let layout = variant.recordLayout
-
-        let declaredLength = Int(b[dataStart - 4]) << 24 | Int(b[dataStart - 3]) << 16
-            | Int(b[dataStart - 2]) << 8 | Int(b[dataStart - 1])
         var dataEnd = dataStart + declaredLength
         if dataEnd > b.count {
             warnings.append("The sequence data is truncated; converting what is present.")
@@ -554,26 +608,37 @@ public struct SVQFile: Sendable {
         }
 
         // MARK: Pattern names
-        // After the event data: the length of the rest (u16 on the XP, u32 on the Fantom-X); on the XP
-        // a 40-byte block (zeros in every sample); then a u16-length list of pattern names, each
-        // pattern ID, name length, name.
-        var namesAt = variant == .xp ? dataEnd + 2 : dataEnd + 4
-        if variant == .xp, namesAt + 2 <= b.count { namesAt += 2 + (Int(b[namesAt]) << 8 | Int(b[namesAt + 1])) }
+        // After the event data: the length of the rest (u16 on the XP and in "SV02", u32 in "SV03"); in
+        // the u16 layout a length-prefixed block (40 zero bytes on the XP, empty in "SV02"); then a
+        // u16-length list of pattern names, each pattern ID, name length, name.
+        let shortLengths = version == 0 || version == 2 || (version != 3 && variant == .xp)
+        var namesAt = shortLengths ? dataEnd + 2 : dataEnd + 4
+        if shortLengths, namesAt + 2 <= b.count { namesAt += 2 + (Int(b[namesAt]) << 8 | Int(b[namesAt + 1])) }
+        // The table is used only if its entries fill it exactly and each names a pattern in the file,
+        // so a file laid out differently (an untested format version) gets no made-up names.
         if namesAt + 2 <= b.count {
             let n = Int(b[namesAt]) << 8 | Int(b[namesAt + 1])
+            let end = namesAt + 2 + n
+            var names: [(UInt8, String)] = []
             var i = namesAt + 2
-            while i + 2 <= min(namesAt + 2 + n, b.count) {
+            while i + 2 <= end, end <= b.count {
                 let id = b[i], length = Int(b[i + 1])
-                guard i + 2 + length <= b.count else { break }
-                let name = SVQFile.text(b[(i + 2) ..< (i + 2 + length)])
-                for k in patterns.indices where patterns[k].identifier == id { patterns[k].name = name }
+                guard i + 2 + length <= end else { break }
+                names.append((id, SVQFile.text(b[(i + 2) ..< (i + 2 + length)])))
                 i += 2 + length
+            }
+            let ids = Set(patterns.map(\.identifier))
+            if i == end, names.allSatisfy({ ids.contains($0.0) }) {
+                for (id, name) in names {
+                    for k in patterns.indices where patterns[k].identifier == id { patterns[k].name = name }
+                }
             }
         }
         self.patterns = patterns
 
         // MARK: Embedded "SVD" directory (system + performance data)
         var blocks: [String: [UInt8]] = [:]
+        var blockModels: [String: String] = [:]
         let directory = SVQFile.find([0x53, 0x56, 0x44, 0x30], in: b, from: dataEnd)   // "SVD0" (XP)
             ?? SVQFile.find([0x53, 0x56, 0x44, 0x31], in: b, from: dataEnd)            // "SVD1" (Fantom-X)
         if let svd = directory, svd >= 2 {
@@ -585,23 +650,49 @@ public struct SVQFile: Sendable {
                 let offset = u32(entry + 8), length = u32(entry + 12)
                 if base + offset + length <= b.count, length > 0 {
                     blocks[tag] = Array(b[(base + offset) ..< (base + offset + length)])
+                    blockModels[tag] = SVQFile.text(b[(entry + 4) ..< (entry + 8)])
                 }
                 entry += 16
             }
         }
         dataBlocks = blocks
-        switch variant {
-        case .xp:
-            performance = blocks["PRFa"].flatMap(XPPerformance.init(packed:))
-            fantomPerformance = nil
-        case .fantomX:
+        xpSystem = variant == .xp
+            ? blocks["SYSb"].flatMap { XPSystem(block: $0, scaleTunesAt: 408) }
+                ?? blocks["SYSa"].flatMap { blockModels["SYSa"] == "XP80" ? XPSystem(block: $0, scaleTunesAt: 400) : nil }
+            : nil
+        // In other format versions, the Performance is decoded only if its block says it is the kind
+        // this decoder knows: XP data ("XP50"/"XP60"/"XP80"), Fantom-S/X data ("FANS"), or the
+        // original Fantom's ("NEXY": Setup, Performance and Multitimbre; no Patches).
+        let performanceModel = blockModels["PRFa"] ?? blockModels["MLTa"] ?? ""
+        let knownModel = variant == .xp ? performanceModel.hasPrefix("XP") : performanceModel == "FANS"
+        fa76Setup = nil
+        if performanceModel == "NEXY" {
             performance = nil
-            fantomPerformance = blocks["PRFa"].flatMap {
-                FantomPerformance(performanceBlock: $0, patchBlock: blocks["PATa"], rhythmBlock: blocks["RHYa"],
-                                  setupBlock: blocks["STPa"])
+            fantomPerformance = nil
+            fa76Setup = FA76Setup(setupBlock: blocks["STPa"], performanceBlock: blocks["PRFa"],
+                                  multitimbreBlock: blocks["MLTa"])
+        } else if tested || knownModel {
+            switch variant {
+            case .xp:
+                performance = blocks["PRFa"].flatMap(XPPerformance.init(packed:))
+                fantomPerformance = nil
+            case .fantomX:
+                performance = nil
+                fantomPerformance = blocks["PRFa"].flatMap {
+                    FantomPerformance(performanceBlock: $0, patchBlock: blocks["PATa"], rhythmBlock: blocks["RHYa"],
+                                      setupBlock: blocks["STPa"])
+                }
+            }
+        } else {
+            performance = nil
+            fantomPerformance = nil
+            if blocks["PRFa"] != nil {
+                warnings.append("Its sound settings (data for \"\(performanceModel)\") aren't decoded yet, so the "
+                    + "song converts without patch selections or mixer settings.")
             }
         }
-        if performance == nil && fantomPerformance == nil {
+        if performance == nil && fantomPerformance == nil && fa76Setup == nil
+            && (tested || performanceModel == "NEXY" || blocks["PRFa"] == nil) {
             warnings.append("This file has no saved Performance, so patch selections and mixer settings cannot be added.")
         }
         self.warnings = warnings
@@ -673,6 +764,29 @@ public struct SVQFile: Sendable {
     }
 
     // MARK: Helpers
+
+    /// How well a record layout fits the event data: the share of records whose type is one this
+    /// decoder knows (a note on a channel 0-15, or a known event), plus a little if the song's end
+    /// record is there. -1 if the data isn't a whole number of records.
+    static func layoutFit(_ b: [UInt8], from start: Int, length: Int,
+                          layout: (size: Int, stepBytes: Int, dataOffset: Int)) -> Double {
+        guard length > 0, length % layout.size == 0 else { return -1 }
+        var known = 0, total = 0, sawEnd = false
+        var off = start
+        let end = min(start + length, b.count)
+        while off + layout.size <= end {
+            let type = b[off + layout.stepBytes], channel = b[off + layout.stepBytes + 1]
+            total += 1
+            switch type {
+            case 0x00 ... 0x7F: if channel < 16 { known += 1 }
+            case 0x80, 0x82, 0x83, 0x84, 0x86, 0x87, 0x88, 0x89, 0x8E, 0x91, 0x92, 0x9A ... 0x9E: known += 1
+            case 0x8F: known += 1; sawEnd = true
+            default: break
+            }
+            off += layout.size
+        }
+        return total == 0 ? -1 : Double(known) / Double(total) + (sawEnd ? 0.01 : 0)
+    }
 
     static func text<C: Collection>(_ bytes: C) -> String where C.Element == UInt8 {
         let chars = bytes.prefix { $0 != 0 }.map { byte -> Character in

@@ -281,6 +281,8 @@ enum Roland {
     static let xpModelID: UInt8 = 0x6A
 
     static let fantomXModelID: [UInt8] = [0x00, 0x6B]
+    /// The original Fantom (FA-76), per its MIDI Implementation.
+    static let fa76ModelID: [UInt8] = [0x00, 0x10]
 
     static func dataSet1(deviceID: UInt8, modelID: [UInt8] = [xpModelID], address: [UInt8], data: [UInt8]) -> [UInt8] {
         let body = address + data

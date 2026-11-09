@@ -1,0 +1,1965 @@
+{
+ "presets": [
+  [
+   "Grand XV",
+   "Contemplate",
+   "Hall Grand",
+   "64voicePno",
+   "Bright Piano",
+   "Nice Piano",
+   "Upright Pno",
+   "Rock Piano",
+   "RockPiano Ch",
+   "Pianomonics",
+   "RN Sad Song",
+   "Y2K Concerto",
+   "Piano+SftPad",
+   "WarmVoxPiano",
+   "Piano+AirPad",
+   "ChoraLeader",
+   "SparklePiano",
+   "Warm pF Mix",
+   "R&Ballad Mix",
+   "Power Octs",
+   "RD-1000",
+   "Retro Rhodes",
+   "Fat Rhodes",
+   "PingE Piano",
+   "Rhodes Trem",
+   "Phaser Dyno",
+   "Hit Rhodes",
+   "Hybrid EP",
+   "Rocky Road",
+   "Sweet Tynes",
+   "Pluk Rhodes",
+   "Rhodes Trip",
+   "AmbiRhodes",
+   "Rholitzer",
+   "SA Rhodes",
+   "Dig Rhodes",
+   "Octa Rhodes",
+   "Waterhodes",
+   "Wurlie",
+   "Curly Wurly",
+   "Wurli World",
+   "Super Trip",
+   "Amped Wurlie",
+   "Dirty Wurlie",
+   "Wurly Gum",
+   "FM Delight",
+   "Cold Roadz",
+   "XV Crystal",
+   "Ring E.Piano",
+   "See-Thru EP",
+   "Innocent EP",
+   "EP+Mod Pad",
+   "WaterPiano2",
+   "Swimming EP",
+   "Backrhodes",
+   "Cutter Clav",
+   "Comp Clav",
+   "Mute Clav D6",
+   "PhazeWahClav",
+   "Phase Clav",
+   "Psyche Clav",
+   "PieceOfCheez",
+   "Harpsy Clav",
+   "Dist Clav",
+   "Voxfuzz Klav",
+   "St.Harpsichd",
+   "PositvHarpsi",
+   "3PartInventn",
+   "Pop Ballad",
+   "Musicbox XV",
+   "Chime Bells",
+   "Shuffle Bell",
+   "Stream Bell",
+   "Heavenals",
+   "HolidayCheer",
+   "Morning Lite",
+   "Digibell Pad",
+   "D50 StacHvn",
+   "Celestabox",
+   "Sandman",
+   "Bell Museum",
+   "Wide Tubular",
+   "True Vibe",
+   "Echo Vibe",
+   "Tremolo Vibe",
+   "Marimbula",
+   "Exotic Velo",
+   "Bottlephone",
+   "IslandSpirit",
+   "Ambient Wood",
+   "Steel Drums",
+   "Soft B",
+   "Ballad B",
+   "Soft Perky",
+   "Full Stops",
+   "Fullness",
+   "Paleface 1",
+   "Paleface 2",
+   "VeloClikOrgn",
+   "British B",
+   "Rocker Org",
+   "Tone Wh.Solo",
+   "Drew's Bee",
+   "Split B",
+   "Velvet Organ",
+   "Verby Organ",
+   "Happy 60s",
+   "96 Years",
+   "Boogie Organ",
+   "Glory Us Rok",
+   "SoapOpera x4",
+   "Klubb Organ",
+   "PercInterval",
+   "Distorted B",
+   "Radikal B",
+   "Cathedral",
+   "Church Harmn",
+   "Cathdr Harmn",
+   "Wedding Mass",
+   "Harmonica XV",
+   "Blues Harp",
+   "Nylon Gtr",
+   "Soft Nylon",
+   "Nylozzicato",
+   "Mutezzicato",
+   "Hybrid Nylon",
+   "Steel Away",
+   "Solo Steel"
+  ],
+  [
+   "Thick Steel",
+   "XV SteelGt 1",
+   "SteelRelease",
+   "XV SteelGt 2",
+   "So nice!",
+   "Steel&Nylon",
+   "Comp'Steel",
+   "Double Steel",
+   "Folk Guitar",
+   "SpanishNight",
+   "Classic Gtr",
+   "DesertCrystl",
+   "DeepInPrayer",
+   "Two+Ensemble",
+   "Harmless",
+   "Clear Guitar",
+   "Jz Gtr Hall",
+   "JC Strat",
+   "Solo Strat",
+   "Plug n' Play",
+   "Wah Guitar",
+   "Trem Guitar",
+   "Rotary Gtr",
+   "Fab 4 Guitar",
+   "Syn Strat",
+   "SwitchOnMute",
+   "LetterFrmPat",
+   "StratSeq'nce",
+   "Swell Strat",
+   "Blusey OD",
+   "Searing Lead",
+   "LouderPlease",
+   "Crying Solo",
+   "Southern Fry",
+   "Strum Distrt",
+   "Match Drive",
+   "Stacked",
+   "2-Stack Over",
+   "COSM Searing",
+   "COSM Loud Gt",
+   "Plugged !!!",
+   "Blue Mutes",
+   "Metal 5150",
+   "Crunch Phase",
+   "Alt Dist Gtr",
+   "Hurtin'Tubes",
+   "Punker",
+   "XV Ac.Bass",
+   "XV Upright",
+   "Ac.Upright",
+   "Fingerd Bass",
+   "Stringless",
+   "LookMaNoFret",
+   "XV Fretless",
+   "Basic F'less",
+   "8-str F'less",
+   "Fretls Dry",
+   "Tap Bass",
+   "Pick Bass",
+   "Pop Bass",
+   "P.Bs Chorus",
+   "TremCho Bs",
+   "Punch Bass",
+   "COSM Bass",
+   "Slap Bass 1",
+   "Slap Bass 2",
+   "Slap Bass 3",
+   "Stick Chopz",
+   "4 Pole Bass",
+   "Tick Bass",
+   "House Bass",
+   "101 Bass",
+   "Wonder Bass",
+   "SinusoidRave",
+   "202 Rude Bs",
+   "Creamy Bass",
+   "Buster Bass",
+   "Thipper Bass",
+   "Phatso Bass",
+   "Acid TB",
+   "TB Squelch",
+   "Ticker Bass",
+   "Muscle Bass",
+   "Grounded Bs",
+   "West End Bs",
+   "Snap Bass",
+   "700 Bassboy",
+   "8VCO MonoSyn",
+   "ResoMoist Bs",
+   "Kickin' Bass",
+   "Sub Zero",
+   "Liquid Bass",
+   "Hefty Bass",
+   "Severe Ow Bs",
+   "Jupiter Bass",
+   "Untamed Bass",
+   "XV Strings",
+   "St.Strings",
+   "BatonStrings",
+   "Fat Strings",
+   "Dolce p/m/f",
+   "Sad Strings",
+   "Lush Strings",
+   "Film Octaves",
+   "Strings4Film",
+   "Marcato",
+   "Marcato Str",
+   "TremoloStrng",
+   "End Titles",
+   "Bass Pizz",
+   "ChamberQrt.1",
+   "ChamberQrt.2",
+   "Lead 4x Vlns",
+   "ChamberSect.",
+   "FullChmbrStr",
+   "Tape Strings",
+   "JP-8 Str 1",
+   "Jupiter 21",
+   "Filt Strings",
+   "HybStringsXV",
+   "UltraSmooth",
+   "Hold A Chord",
+   "Prelude",
+   "ChamberPlyrs",
+   "TudorFanfare",
+   "Hornz",
+   "Symphonique",
+   "Wood Symphny"
+  ],
+  [
+   "Henry VIII",
+   "Str&Brs Orch",
+   "Soft Symphny",
+   "Brassy Symph",
+   "My Orchestra",
+   "HybOrchestra",
+   "Swell Oboe",
+   "Oboe mf",
+   "Clarinet mp",
+   "Flute/Clari",
+   "Orch Reeds",
+   "Wind Wood",
+   "SwellEnsembl",
+   "Flute",
+   "Jazzer Flute",
+   "Dual Flutes",
+   "LegatoBamboo",
+   "Ambience Flt",
+   "The Andes",
+   "Deja Vlute",
+   "Tooters Lead",
+   "Air Lead",
+   "Flutterys",
+   "Brass Sect",
+   "Tight Brass",
+   "Simply Brass",
+   "FullSt Brass",
+   "Dragnet",
+   "Biggie Brass",
+   "BiggieBrass2",
+   "NewR&RBrass",
+   "Tower Trumps",
+   "BigBrassBand",
+   "Lil'BigHornz",
+   "VoyagerBrass",
+   "Wheel Brass",
+   "Symph Horns",
+   "XV Trumpet",
+   "Ballad Trump",
+   "XV Trombone",
+   "Trombone Atm",
+   "Harmon Mute",
+   "Poly Brass",
+   "Rugby Horn",
+   "JupiterHorns",
+   "3 Osc Brass",
+   "FatSynBrass",
+   "T8 Brass",
+   "True ANALOG",
+   "Triumph Brs",
+   "P5 Polymod",
+   "Solo SoprSax",
+   "Ambient Sax",
+   "Solo AltoSax",
+   "XV DynoTenor",
+   "Honker Bari",
+   "Swingin'Bari",
+   "Full Saxz",
+   "LA Sax's",
+   "Soaring Saws",
+   "Square Roots",
+   "BOG",
+   "Saw Grits",
+   "Talking Box",
+   "Retro Lead",
+   "LivingInSync",
+   "Leads United",
+   "Dirty Sync",
+   "DistortaSync",
+   "Blistering",
+   "Guttural",
+   "Powersoaker",
+   "Mean Thing",
+   "Jet Sync",
+   "Edye Boost",
+   "JD Multi Ld",
+   "Enchanted XV",
+   "Mini Lead",
+   "Flyin' High",
+   "Soft Tooth",
+   "Soaring Sqr",
+   "Soaring Sync",
+   "Nasal Spray",
+   "Lamb Lead",
+   "Creamer",
+   "Sine System",
+   "WhistlinAtom",
+   "Pure Pipe",
+   "You and Luck",
+   "LegatoJupitr",
+   "Atlantis",
+   "Jet Voxs",
+   "Dirty Hit",
+   "MOVE!",
+   "Reel Slam",
+   "OffTheRecord",
+   "Hit Bitz",
+   "80s LoFi Hit",
+   "Impact",
+   "Backspinner",
+   "Auto Chord",
+   "3rdTeenChord",
+   "Bend a Chord",
+   "DiscreteChrd",
+   "2ndRateChord",
+   "House Chord",
+   "MinorIncidnt",
+   "GenderBender",
+   "AM 05:59",
+   "Chordbender",
+   "Phunky DC",
+   "RageInYouth",
+   "Agent X",
+   "Winky",
+   "Looney 2nz",
+   "Shortrave",
+   "DeeperBeeper",
+   "Sequalog",
+   "Dance Zipper",
+   "Technogrunge",
+   "Percolator",
+   "Civilization",
+   "Filter Morph",
+   "Choir Bounce",
+   "Ambi Voices",
+   "Say Yeah !",
+   "Vocovox Wave",
+   "Xcuse me"
+  ],
+  [
+   "Froggy Bass",
+   "5ths in 4ths",
+   "Pretty Ugly",
+   "Con Sequence",
+   "BermudaShort",
+   "Saw n' 202",
+   "Technoheadz",
+   "Boss'd Synth",
+   "Cross Fire",
+   "Techno Cave",
+   "Generator",
+   "Xtremities",
+   "Auto TB-303",
+   "Happy Brass",
+   "Tape Orch",
+   "Tekno Pizz",
+   "Analog Seq",
+   "Booster Bips",
+   "Keep :-)",
+   "Dist TB-303",
+   "B'on d'moov!",
+   "Rippling",
+   "SteppingPhsr",
+   "Trance Fair",
+   "TechnoSurf 1",
+   "TechnoSurf 2",
+   "GermanBounce",
+   "TMT Scanner",
+   "Complex Echo",
+   "Double Helix",
+   "Acid JaZZ",
+   "Cutter>ModWh",
+   "Blades",
+   "Mad Bender",
+   "Mood Ringz",
+   "Wedo-Wodo",
+   "S.O.S.trings",
+   "Syncronicity",
+   "Groovedigger",
+   "Alternative",
+   "Raggatronic",
+   "Flying Waltz",
+   "DanceMachina",
+   "Vox Chopper",
+   "SlicingSyVox",
+   "Slice Girlz",
+   "Voice Stream",
+   "Vortex",
+   "man@work",
+   "PressureDome",
+   "Quasar /Aft",
+   "Ionizer",
+   "Cyber Dreams",
+   "Strobe Mode",
+   "Aftertouchin",
+   "Rhythm Sync",
+   "MilleniumStr",
+   "Bounce Baby!",
+   "Bounce Daddy",
+   "Bounce Mama!",
+   "Bounce Noize",
+   "Auto Riff",
+   "What a Gate!",
+   "Mini Sequenz",
+   "Slice & Dice",
+   "BrushingSaw1",
+   "BrushingSaw2",
+   "Throbulax",
+   "Cultivate",
+   "Soff Machine",
+   "CrystalGlass",
+   "RiversOfTime",
+   "Glistening",
+   "Shadows",
+   "Shapeshifter",
+   "Moon Rise",
+   "Atmospherics",
+   "Runaway Rez",
+   "Dropplets",
+   "Indian Guru",
+   "Cosmic Rain",
+   "Trying Winds",
+   "Space Whiz",
+   "ForestMoon",
+   "Predator 2",
+   "Dark Side",
+   "The Beast",
+   "X-mod Reso",
+   "Planet Meta",
+   "Nexus",
+   "Halographix",
+   "Windy Dunes",
+   "Ice Blasts",
+   "Ringy Thingy",
+   "DigitalDrone",
+   "Space Race",
+   "Bowed Bell",
+   "X-Tension",
+   "DUB!!!",
+   "Dream Diver",
+   "Flashback",
+   "St.LoFiNoise",
+   "BPFsweep Mod",
+   "Hydrogen",
+   "Queen V",
+   "SkinnyBounce",
+   "SquareBounce",
+   "Galactic",
+   "Powerwiggle",
+   "80s Retrosyn",
+   "Power Stack",
+   "Cheepy Synth",
+   "Don't Jump",
+   "Big Bubbles",
+   "X-mod Sweep",
+   "PhaseBlipper",
+   "Glider",
+   "Bag O' Bones",
+   "Funky Tube",
+   "AirSoThin",
+   "Poly Saws",
+   "Analogical",
+   "Waspy Pulse",
+   "Digi Phased",
+   "Sweep Clav",
+   "Synth Ethics",
+   "Harm is Fine",
+   "D-2000"
+  ],
+  [
+   "Ackward East",
+   "Promonade",
+   "Ray Tracer",
+   "Soaring Hrns",
+   "SoaringHrns2",
+   "Vintage Orch",
+   "Glass Orbit",
+   "Down2Earth",
+   "5th Atm /Aft",
+   "Mod DirtyWav",
+   "Lo-fiBellPad",
+   "Apophis",
+   "Lo-fi Sweep",
+   "Modular Life",
+   "Oscillations",
+   "Vintage Pad",
+   "Combing",
+   "Dream 2001",
+   "Rolling 5ths",
+   "Analogue Str",
+   "Lunar Strngs",
+   "5080 Random",
+   "XV Stepping",
+   "India Garden",
+   "FloatingVox",
+   "Heirborne",
+   "Wine Drops",
+   "Belly Pad",
+   "Spectre",
+   "Rainy Day",
+   "Morph Pad",
+   "Nanolog Pad",
+   "Air Pad",
+   "Sabbath Day",
+   "XV BlowPad",
+   "Soft Padding",
+   "Warmth Pad",
+   "Warmth",
+   "Silky Way",
+   "Soundtraque",
+   "Spread Pad",
+   "ClassicJPpad",
+   "Jupiter Str",
+   "Fat Pad",
+   "Cloud 9",
+   "OvertoneScan",
+   "GR700 Pad",
+   "GlobalWarmup",
+   "White Arcade",
+   "SquareDreams",
+   "Pulse Pad",
+   "JP-8Haunting",
+   "Paradise",
+   "Translucence",
+   "D'light",
+   "2.2 Strings",
+   "Moonchimes",
+   "SusPed Swap",
+   "Dimensional",
+   "E-Motion Pad",
+   "Octapad",
+   "Gluey Pad",
+   "Borealis",
+   "PhasingPad",
+   "Ethereal Str",
+   "Darkshine",
+   "Velcropad",
+   "NothrnLights",
+   "Sun Dive",
+   "Traffic Pad",
+   "Aliastrings",
+   "On The Air",
+   "Brite Vox 1",
+   "Brite Vox 2",
+   "Longing...",
+   "Ooh)Aah Mod",
+   "Vocals: Ooh",
+   "Vocals: Scat",
+   "Vocals: Boys",
+   "St. Choir",
+   "SampleThe80s",
+   "Sacred Tree",
+   "VP330 OctEko",
+   "Whisper Vox",
+   "Dark Vox",
+   "Spaced Voxx",
+   "R-mod Vox",
+   "Etheraaahl",
+   "Andreas Cave",
+   "AmbiPizza",
+   "Voxy Nylon",
+   "EastrnEurope",
+   "Far Eastern",
+   "Pilgrimage",
+   "Celtic Harp",
+   "Harp On It",
+   "VelHarp)Harm",
+   "Reso Sitar",
+   "The Ganges",
+   "Sitar",
+   "Dulcimer",
+   "Dulcitar",
+   "MountainFolk",
+   "Byzantine",
+   "AsiaPlectrum",
+   "Pluckaphone",
+   "Taj Mahal",
+   "Sheep Dream",
+   "Cairo lead",
+   "Lochscapes",
+   "Celtic Song",
+   "Blown Str.",
+   "Brass Tubes",
+   "Dreams East",
+   "Synergistic",
+   "Slap Timps",
+   "Rain Forest",
+   "Upwind Glata",
+   "Aftermath",
+   "Tape Q",
+   "Open End",
+   "TempoMadness",
+   "Gruvacious",
+   "Thor's Drums",
+   "Suite Combo",
+   "Lounge Gig",
+   "Wedding Gig",
+   "GenerationXV"
+  ]
+ ],
+ "presetRhythmSets": [
+  "R&B Kit 1",
+  "R&B Kit 2",
+  "House Kit",
+  "Techno Kit",
+  "XV Pop Kit",
+  "Pop Kit 2",
+  "XV Rock Kit",
+  "Rock Kit 2",
+  "XV Jazz Kit",
+  "Jazz Kit 2",
+  "XV Bully Kit",
+  "Bully Kit 2",
+  "XV Rust Kit",
+  "Rust Kit 2",
+  "XV WayHipKit",
+  "OrchestraKit"
+ ],
+ "gm2RhythmSets": [
+  "GM2 STANDARD",
+  "GM2 ROOM",
+  "GM2 POWER",
+  "GM2 ELECTRIC",
+  "GM2 ANALOG",
+  "GM2 JAZZ",
+  "GM2 BRUSH",
+  "GM2 ORCHSTRA",
+  "GM2 SFX"
+ ],
+ "gm2": [
+  [
+   0,
+   0,
+   "Piano 1"
+  ],
+  [
+   1,
+   0,
+   "Piano 1w"
+  ],
+  [
+   2,
+   0,
+   "European Pf"
+  ],
+  [
+   0,
+   1,
+   "Piano 2"
+  ],
+  [
+   1,
+   1,
+   "Piano 2w"
+  ],
+  [
+   0,
+   2,
+   "Piano 3"
+  ],
+  [
+   1,
+   2,
+   "Piano 3w"
+  ],
+  [
+   0,
+   3,
+   "Honky-tonk"
+  ],
+  [
+   1,
+   3,
+   "Honky-tonk 2"
+  ],
+  [
+   0,
+   4,
+   "E.Piano 1"
+  ],
+  [
+   1,
+   4,
+   "St.Soft EP"
+  ],
+  [
+   2,
+   4,
+   "FM+SA EP"
+  ],
+  [
+   3,
+   4,
+   "Wurly"
+  ],
+  [
+   0,
+   5,
+   "E.Piano 2"
+  ],
+  [
+   1,
+   5,
+   "Detuned EP 2"
+  ],
+  [
+   2,
+   5,
+   "St.FM EP"
+  ],
+  [
+   3,
+   5,
+   "EP Legend"
+  ],
+  [
+   4,
+   5,
+   "EP Phase"
+  ],
+  [
+   0,
+   6,
+   "Harpsichord"
+  ],
+  [
+   1,
+   6,
+   "Coupled Hps."
+  ],
+  [
+   2,
+   6,
+   "Harpsi.w"
+  ],
+  [
+   3,
+   6,
+   "Harpsi.o"
+  ],
+  [
+   0,
+   7,
+   "Clav."
+  ],
+  [
+   1,
+   7,
+   "Pulse Clav"
+  ],
+  [
+   0,
+   8,
+   "Celesta"
+  ],
+  [
+   0,
+   9,
+   "Glockenspiel"
+  ],
+  [
+   0,
+   10,
+   "Music Box"
+  ],
+  [
+   0,
+   11,
+   "Vibraphone"
+  ],
+  [
+   1,
+   11,
+   "Vibraphone w"
+  ],
+  [
+   0,
+   12,
+   "Marimba"
+  ],
+  [
+   1,
+   12,
+   "Marimba w"
+  ],
+  [
+   0,
+   13,
+   "Xylophone"
+  ],
+  [
+   0,
+   14,
+   "Tubular-bell"
+  ],
+  [
+   1,
+   14,
+   "Church Bell"
+  ],
+  [
+   2,
+   14,
+   "Carillon"
+  ],
+  [
+   0,
+   15,
+   "Santur"
+  ],
+  [
+   0,
+   16,
+   "Organ 1"
+  ],
+  [
+   1,
+   16,
+   "Trem. Organ"
+  ],
+  [
+   2,
+   16,
+   "60's Organ 1"
+  ],
+  [
+   3,
+   16,
+   "70's E.Organ"
+  ],
+  [
+   0,
+   17,
+   "Organ 2"
+  ],
+  [
+   1,
+   17,
+   "Chorus Or.2"
+  ],
+  [
+   2,
+   17,
+   "Perc. Organ"
+  ],
+  [
+   0,
+   18,
+   "Organ 3"
+  ],
+  [
+   0,
+   19,
+   "Church Org.1"
+  ],
+  [
+   1,
+   19,
+   "Church Org.2"
+  ],
+  [
+   2,
+   19,
+   "Church Org.3"
+  ],
+  [
+   0,
+   20,
+   "Reed Organ"
+  ],
+  [
+   1,
+   20,
+   "Puff Organ"
+  ],
+  [
+   0,
+   21,
+   "Accordion Fr"
+  ],
+  [
+   1,
+   21,
+   "Accordion It"
+  ],
+  [
+   0,
+   22,
+   "Harmonica"
+  ],
+  [
+   0,
+   23,
+   "Bandoneon"
+  ],
+  [
+   0,
+   24,
+   "Nylon-str.Gt"
+  ],
+  [
+   1,
+   24,
+   "Ukulele"
+  ],
+  [
+   2,
+   24,
+   "Nylon Gt.o"
+  ],
+  [
+   3,
+   24,
+   "Nylon Gt.2"
+  ],
+  [
+   0,
+   25,
+   "Steel-str.Gt"
+  ],
+  [
+   1,
+   25,
+   "12-str.Gt"
+  ],
+  [
+   2,
+   25,
+   "Mandolin"
+  ],
+  [
+   3,
+   25,
+   "Steel + Body"
+  ],
+  [
+   0,
+   26,
+   "Jazz Gt."
+  ],
+  [
+   1,
+   26,
+   "Pedal Steel"
+  ],
+  [
+   0,
+   27,
+   "Clean Gt."
+  ],
+  [
+   1,
+   27,
+   "Chorus Gt."
+  ],
+  [
+   2,
+   27,
+   "Mid Tone GTR"
+  ],
+  [
+   0,
+   28,
+   "Muted Gt."
+  ],
+  [
+   1,
+   28,
+   "Funk Pop"
+  ],
+  [
+   2,
+   28,
+   "Funk Gt.2"
+  ],
+  [
+   3,
+   28,
+   "Jazz Man"
+  ],
+  [
+   0,
+   29,
+   "Overdrive Gt"
+  ],
+  [
+   1,
+   29,
+   "Guitar Pinch"
+  ],
+  [
+   0,
+   30,
+   "DistortionGt"
+  ],
+  [
+   1,
+   30,
+   "Feedback Gt."
+  ],
+  [
+   2,
+   30,
+   "Dist Rtm GTR"
+  ],
+  [
+   0,
+   31,
+   "Gt.Harmonics"
+  ],
+  [
+   1,
+   31,
+   "Gt. Feedback"
+  ],
+  [
+   0,
+   32,
+   "Acoustic Bs."
+  ],
+  [
+   0,
+   33,
+   "Fingered Bs."
+  ],
+  [
+   1,
+   33,
+   "Finger Slap"
+  ],
+  [
+   0,
+   34,
+   "Picked Bass"
+  ],
+  [
+   0,
+   35,
+   "Fretless Bs."
+  ],
+  [
+   0,
+   36,
+   "Slap Bass 1"
+  ],
+  [
+   0,
+   37,
+   "Slap Bass 2"
+  ],
+  [
+   0,
+   38,
+   "Synth Bass 1"
+  ],
+  [
+   1,
+   38,
+   "SynthBass101"
+  ],
+  [
+   2,
+   38,
+   "Acid Bass"
+  ],
+  [
+   3,
+   38,
+   "Clavi Bass"
+  ],
+  [
+   4,
+   38,
+   "Hammer"
+  ],
+  [
+   0,
+   39,
+   "Synth Bass 2"
+  ],
+  [
+   1,
+   39,
+   "Beef FM Bass"
+  ],
+  [
+   2,
+   39,
+   "RubberBass 2"
+  ],
+  [
+   3,
+   39,
+   "Attack Pulse"
+  ],
+  [
+   0,
+   40,
+   "Violin"
+  ],
+  [
+   1,
+   40,
+   "Slow Violin"
+  ],
+  [
+   0,
+   41,
+   "Viola"
+  ],
+  [
+   0,
+   42,
+   "Cello"
+  ],
+  [
+   0,
+   43,
+   "Contrabass"
+  ],
+  [
+   0,
+   44,
+   "Tremolo Str"
+  ],
+  [
+   0,
+   45,
+   "PizzicatoStr"
+  ],
+  [
+   0,
+   46,
+   "Harp"
+  ],
+  [
+   1,
+   46,
+   "Yang Qin"
+  ],
+  [
+   0,
+   47,
+   "Timpani"
+  ],
+  [
+   0,
+   48,
+   "Strings"
+  ],
+  [
+   1,
+   48,
+   "Orchestra"
+  ],
+  [
+   2,
+   48,
+   "60s Strings"
+  ],
+  [
+   0,
+   49,
+   "Slow Strings"
+  ],
+  [
+   0,
+   50,
+   "Syn.Strings1"
+  ],
+  [
+   1,
+   50,
+   "Syn.Strings3"
+  ],
+  [
+   0,
+   51,
+   "Syn.Strings2"
+  ],
+  [
+   0,
+   52,
+   "Choir Aahs"
+  ],
+  [
+   1,
+   52,
+   "Chorus Aahs"
+  ],
+  [
+   0,
+   53,
+   "Voice Oohs"
+  ],
+  [
+   1,
+   53,
+   "Humming"
+  ],
+  [
+   0,
+   54,
+   "SynVox"
+  ],
+  [
+   1,
+   54,
+   "Analog Voice"
+  ],
+  [
+   0,
+   55,
+   "OrchestraHit"
+  ],
+  [
+   1,
+   55,
+   "Bass Hit"
+  ],
+  [
+   2,
+   55,
+   "6th Hit"
+  ],
+  [
+   3,
+   55,
+   "Euro Hit"
+  ],
+  [
+   0,
+   56,
+   "Trumpet"
+  ],
+  [
+   1,
+   56,
+   "Dark Trumpet"
+  ],
+  [
+   0,
+   57,
+   "Trombone"
+  ],
+  [
+   1,
+   57,
+   "Trombone 2"
+  ],
+  [
+   2,
+   57,
+   "Bright Tb"
+  ],
+  [
+   0,
+   58,
+   "Tuba"
+  ],
+  [
+   0,
+   59,
+   "MutedTrumpet"
+  ],
+  [
+   1,
+   59,
+   "MuteTrumpet2"
+  ],
+  [
+   0,
+   60,
+   "French Horns"
+  ],
+  [
+   1,
+   60,
+   "Fr.Horn 2"
+  ],
+  [
+   0,
+   61,
+   "Brass 1"
+  ],
+  [
+   1,
+   61,
+   "Brass 2"
+  ],
+  [
+   0,
+   62,
+   "Synth Brass1"
+  ],
+  [
+   1,
+   62,
+   "Pro Brass"
+  ],
+  [
+   2,
+   62,
+   "Oct SynBrass"
+  ],
+  [
+   3,
+   62,
+   "Jump Brass"
+  ],
+  [
+   0,
+   63,
+   "Synth Brass2"
+  ],
+  [
+   1,
+   63,
+   "SynBrass sfz"
+  ],
+  [
+   2,
+   63,
+   "Velo Brass 1"
+  ],
+  [
+   0,
+   64,
+   "Soprano Sax"
+  ],
+  [
+   0,
+   65,
+   "Alto Sax"
+  ],
+  [
+   0,
+   66,
+   "Tenor Sax"
+  ],
+  [
+   0,
+   67,
+   "Baritone Sax"
+  ],
+  [
+   0,
+   68,
+   "Oboe"
+  ],
+  [
+   0,
+   69,
+   "English Horn"
+  ],
+  [
+   0,
+   70,
+   "Bassoon"
+  ],
+  [
+   0,
+   71,
+   "Clarinet"
+  ],
+  [
+   0,
+   72,
+   "Piccolo"
+  ],
+  [
+   0,
+   73,
+   "Flute"
+  ],
+  [
+   0,
+   74,
+   "Recorder"
+  ],
+  [
+   0,
+   75,
+   "Pan Flute"
+  ],
+  [
+   0,
+   76,
+   "Bottle Blow"
+  ],
+  [
+   0,
+   77,
+   "Shakuhachi"
+  ],
+  [
+   0,
+   78,
+   "Whistle"
+  ],
+  [
+   0,
+   79,
+   "Ocarina"
+  ],
+  [
+   0,
+   80,
+   "Square Wave"
+  ],
+  [
+   1,
+   80,
+   "MG Square"
+  ],
+  [
+   2,
+   80,
+   "2600 Sine"
+  ],
+  [
+   0,
+   81,
+   "Saw Wave"
+  ],
+  [
+   1,
+   81,
+   "OB2 Saw"
+  ],
+  [
+   2,
+   81,
+   "Doctor Solo"
+  ],
+  [
+   3,
+   81,
+   "Natural Lead"
+  ],
+  [
+   4,
+   81,
+   "SequencedSaw"
+  ],
+  [
+   0,
+   82,
+   "Syn.Calliope"
+  ],
+  [
+   0,
+   83,
+   "Chiffer Lead"
+  ],
+  [
+   0,
+   84,
+   "Charang"
+  ],
+  [
+   1,
+   84,
+   "Wire Lead"
+  ],
+  [
+   0,
+   85,
+   "Solo Vox"
+  ],
+  [
+   0,
+   86,
+   "5th Saw Wave"
+  ],
+  [
+   0,
+   87,
+   "Bass & Lead"
+  ],
+  [
+   1,
+   87,
+   "Delayed Lead"
+  ],
+  [
+   0,
+   88,
+   "Fantasia"
+  ],
+  [
+   0,
+   89,
+   "Warm Pad"
+  ],
+  [
+   1,
+   89,
+   "Sine Pad"
+  ],
+  [
+   0,
+   90,
+   "Polysynth"
+  ],
+  [
+   0,
+   91,
+   "Space Voice"
+  ],
+  [
+   1,
+   91,
+   "Itopia"
+  ],
+  [
+   0,
+   92,
+   "Bowed Glass"
+  ],
+  [
+   0,
+   93,
+   "Metal Pad"
+  ],
+  [
+   0,
+   94,
+   "Halo Pad"
+  ],
+  [
+   0,
+   95,
+   "Sweep Pad"
+  ],
+  [
+   0,
+   96,
+   "Ice Rain"
+  ],
+  [
+   0,
+   97,
+   "Soundtrack"
+  ],
+  [
+   0,
+   98,
+   "Crystal"
+  ],
+  [
+   1,
+   98,
+   "Syn Mallet"
+  ],
+  [
+   0,
+   99,
+   "Atmosphere"
+  ],
+  [
+   0,
+   100,
+   "Brightness"
+  ],
+  [
+   0,
+   101,
+   "Goblin"
+  ],
+  [
+   0,
+   102,
+   "Echo Drops"
+  ],
+  [
+   1,
+   102,
+   "Echo Bell"
+  ],
+  [
+   2,
+   102,
+   "Echo Pan"
+  ],
+  [
+   0,
+   103,
+   "Star Theme"
+  ],
+  [
+   0,
+   104,
+   "Sitar"
+  ],
+  [
+   1,
+   104,
+   "Sitar 2"
+  ],
+  [
+   0,
+   105,
+   "Banjo"
+  ],
+  [
+   0,
+   106,
+   "Shamisen"
+  ],
+  [
+   0,
+   107,
+   "Koto"
+  ],
+  [
+   1,
+   107,
+   "Taisho Koto"
+  ],
+  [
+   0,
+   108,
+   "Kalimba"
+  ],
+  [
+   0,
+   109,
+   "Bagpipe"
+  ],
+  [
+   0,
+   110,
+   "Fiddle"
+  ],
+  [
+   0,
+   111,
+   "Shanai"
+  ],
+  [
+   0,
+   112,
+   "Tinkle Bell"
+  ],
+  [
+   0,
+   113,
+   "Agogo"
+  ],
+  [
+   0,
+   114,
+   "Steel Drums"
+  ],
+  [
+   0,
+   115,
+   "Woodblock"
+  ],
+  [
+   1,
+   115,
+   "Castanets"
+  ],
+  [
+   0,
+   116,
+   "Taiko"
+  ],
+  [
+   1,
+   116,
+   "Concert BD"
+  ],
+  [
+   0,
+   117,
+   "Melo. Tom 1"
+  ],
+  [
+   1,
+   117,
+   "Melo. Tom 2"
+  ],
+  [
+   0,
+   118,
+   "Synth Drum"
+  ],
+  [
+   1,
+   118,
+   "808 Tom"
+  ],
+  [
+   2,
+   118,
+   "Elec Perc"
+  ],
+  [
+   0,
+   119,
+   "Reverse Cym."
+  ],
+  [
+   0,
+   120,
+   "Gt.FretNoise"
+  ],
+  [
+   1,
+   120,
+   "Gt.Cut Noise"
+  ],
+  [
+   2,
+   120,
+   "String Slap"
+  ],
+  [
+   0,
+   121,
+   "Breath Noise"
+  ],
+  [
+   1,
+   121,
+   "Fl.Key Click"
+  ],
+  [
+   0,
+   122,
+   "Seashore"
+  ],
+  [
+   1,
+   122,
+   "Rain"
+  ],
+  [
+   2,
+   122,
+   "Thunder"
+  ],
+  [
+   3,
+   122,
+   "Wind"
+  ],
+  [
+   4,
+   122,
+   "Stream"
+  ],
+  [
+   5,
+   122,
+   "Bubble"
+  ],
+  [
+   0,
+   123,
+   "Bird"
+  ],
+  [
+   1,
+   123,
+   "Dog"
+  ],
+  [
+   2,
+   123,
+   "Horse-Gallop"
+  ],
+  [
+   3,
+   123,
+   "Bird 2"
+  ],
+  [
+   0,
+   124,
+   "Telephone 1"
+  ],
+  [
+   1,
+   124,
+   "Telephone 2"
+  ],
+  [
+   2,
+   124,
+   "DoorCreaking"
+  ],
+  [
+   3,
+   124,
+   "Door"
+  ],
+  [
+   4,
+   124,
+   "Scratch"
+  ],
+  [
+   5,
+   124,
+   "Wind Chimes"
+  ],
+  [
+   0,
+   125,
+   "Helicopter"
+  ],
+  [
+   1,
+   125,
+   "Car-Engine"
+  ],
+  [
+   2,
+   125,
+   "Car-Stop"
+  ],
+  [
+   3,
+   125,
+   "Car-Pass"
+  ],
+  [
+   4,
+   125,
+   "Car-Crash"
+  ],
+  [
+   5,
+   125,
+   "Siren"
+  ],
+  [
+   6,
+   125,
+   "Train"
+  ],
+  [
+   7,
+   125,
+   "Jetplane"
+  ],
+  [
+   8,
+   125,
+   "Starship"
+  ],
+  [
+   9,
+   125,
+   "Burst Noise"
+  ],
+  [
+   0,
+   126,
+   "Applause"
+  ],
+  [
+   1,
+   126,
+   "Laughing"
+  ],
+  [
+   2,
+   126,
+   "Screaming"
+  ],
+  [
+   3,
+   126,
+   "Punch"
+  ],
+  [
+   4,
+   126,
+   "Heart Beat"
+  ],
+  [
+   5,
+   126,
+   "Footsteps"
+  ],
+  [
+   0,
+   127,
+   "Gun Shot"
+  ],
+  [
+   1,
+   127,
+   "Machine Gun"
+  ],
+  [
+   2,
+   127,
+   "Lasergun"
+  ],
+  [
+   3,
+   127,
+   "Explosion"
+  ]
+ ]
+}

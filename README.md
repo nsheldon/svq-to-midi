@@ -1,10 +1,10 @@
 # SVQ to MIDI
 
-A macOS app that converts Roland XP-50, XP-60, XP-80 and Fantom-X6/X7/X8 sequencer songs
-(`.SVQ` files) to Standard MIDI Files. It also reads the Performance saved with each song and
+A macOS app that converts Roland XP-50, XP-60, XP-80, Fantom (FA-76), Fantom-S, Fantom-X6/X7/X8
+and MC-80 sequencer songs (`.SVQ` files) to Standard MIDI Files. It also reads the Performance saved with each song and
 adds Bank Select and Program Change messages, so every Part gets the patch it used on the
 instrument. It can also add the instrument's setup as System Exclusive: the XP-80 Performance, or
-every Fantom-X Part's complete saved Patch or Rhythm Set.
+every Fantom-S/X Part's complete saved Patch or Rhythm Set.
 
 ## Features
 
@@ -33,14 +33,20 @@ every Fantom-X Part's complete saved Patch or Rhythm Set.
   order (Logic Pro imports it as one Program event with its Bank Select, ahead of the notes). A
   controller or Program Change the song itself sends at the start is left to the song.
   - The setup as SysEx, on a separate "Setup SysEx" track so the song keeps its original timing
-    and measure count. XP songs: the Performance (Common plus 16 Parts), byte-identical to what
-    the XP-80 transmits. Fantom-X songs: every Part's saved Patch or Rhythm Set, plus Patch mode's
+    and measure count. XP songs: the saved System settings that shape the sound (Sound Mode,
+    selected Performance, Master Tune, scale tunes, effect switches), then the Performance (Common
+    plus 16 Parts), byte-identical to what the XP-80 transmits. Fantom songs start with their
+    saved Setup (Sound Mode and selections). Fantom-X songs: every Part's saved Patch or Rhythm Set, plus Patch mode's
     keyboard and pad sounds, sent after the Bank Select/Program Change so the song plays with
     exactly the sounds it was saved with, including user patches and unsaved edits. Solo the
     setup track and play it through once, then mute it and play the song. Fantom-X Parts whose
     sound is sent this way get no Program Change, which would replace it on later plays. For
     Fantom-X songs saved in Performance mode, the Performance itself (effects, Part, zone and
     controller settings) is sent first; this part is unverified (see Known limits).
+  - Optionally, the player's controller and keyboard settings saved with the song: the XP's
+    System preferences (receive switches, control channel, pedal and controller assignments,
+    keyboard, arpeggio) and the Fantom Performances' keyboard Zones and Controller section. Off by
+    default, since some of them (such as receive switches) can stop the song's own setup working.
   - Optional empty lead-in measures before the song
 - Lets you assign XP SR-JV80 Wave Expansion boards to slots A-D, which determines their Bank Select.
 - Saves patterns (XP RPS phrases, Fantom-X patterns) as separate MIDI files, named with the
@@ -144,10 +150,21 @@ layout; they don't reproduce Roland's logo or model lettering.
 ## Known limits
 
 - Tested with XP-80 files (`SV00`, `XP-80 0105 1.7`) and Fantom-X files (`SV03`,
-  `MC-80      1.1.1`). Other Roland sequencers that write `.SVQ` files may differ: MC-80 and
-  Fantom-S files will probably work, while files from the original Fantom (FA-76), MC-50mkII and
-  JV-1000 are untested. At least one other variant of the format exists, probably the original
-  Fantom's. Sample files from these instruments would help.
+  `MC-80      1.1.1`) against the instruments' own MIDI exports. Fantom-S songs (`SV03`,
+  `MC-80      1.2`) use the same format and data blocks: Roland's five Fantom-S demo songs (from
+  the Fantom-S 1.09 system update) decode completely, but no Fantom-S MIDI export was available to
+  compare them with. Fantom-S songs get the Fantom-S's own sound names and Setup and Controller
+  sizes, from its Sound List and Parameter List. Other Roland sequencers that write `.SVQ` files may differ: MC-80 files will
+  probably work, while files from the original Fantom (FA-76), MC-50mkII and JV-1000 are
+  untested. The original Fantom (FA-76) and the MC-80 write `SV02`, worked out from three `SV02`
+  songs inside the Fantom's own firmware. Their song data converts, and the original Fantom's
+  saved Multitimbre or Performance gives each Part's sound (named from the Fantom's Patch and
+  Rhythm Set Lists), Bank Select, Program Change and mix; but no MIDI export of an `SV02` song was
+  available to compare with, and the layout comes from the firmware's presets and one song. The
+  SysEx option sends the original Fantom's saved Multitimbre or Performance (after its Sound
+  Mode); it's unverified (no Fantom dump was available), and each Part's Decay Time Offset is sent
+  as 64 because its slot in the file holds something else. The MC-80 saves no sound settings (its
+  sounds came from a VE-GS board). Sample files from these instruments would help.
 - Fantom-X Patch SysEx is verified byte-for-byte against Fantom-X Patch dumps. Rhythm Set SysEx
   uses the same rules and decodes plausibly (all names readable, all values in range), but no
   Rhythm Set dump was available to verify it. The Fantom-X Performance (Common, three MFX,
@@ -171,7 +188,11 @@ layout; they don't reproduce Roland's logo or model lettering.
   can skip, as on the instrument) and pattern names are consistent across every sample.
 - The meaning of the track Output bits comes from one Fantom-X song plus the defaults in
   all the others; it's consistent with everything in that song, but no other sample changes it.
-- For Fantom-X songs saved in Patch mode, the keyboard and pad receive channels are system
+- Fantom-X audio tracks (system 2.x, the Audio Track Expansion) are saved in a separate `.SVA`
+  file beside the song, which isn't read: audio has no MIDI equivalent (the app notes when a song
+  has one). Songs saved by Fantom-X
+  system 1.0x and 2.x are otherwise the same format.
+- For Fantom-S/X songs saved in Patch mode, the keyboard and pad receive channels are system
   settings that aren't in the file, so the Fantom-X defaults (1 and 10) are used. A song made
   on a Fantom-X whose system channels were changed would need those channels instead.
 - A few SR-JV80 names come from scans or transcriptions rather than exact text: the Dance board
@@ -183,8 +204,9 @@ layout; they don't reproduce Roland's logo or model lettering.
   may show "Rhodes" where Roland's revised lists say "EP"; a song shows its own saved name anyway.
 - Bank Select for PCM card patches (MSB 83) comes from JV-series documentation and hasn't
   been checked on an XP-80. None of the sample songs use a PCM card.
-- The XP's `SYSa`/`SYSb` blocks (the System settings saved with a song) are mostly decoded but
-  aren't used, since they don't affect playback. The System Common settings, pedals and scale
+- The XP's `SYSa`/`SYSb` blocks (the System settings saved with a song) are mostly decoded; the
+  SysEx option sends the ones that shape the sound (Sound Mode, selected Performance, Master Tune,
+  scale tunes, effect switches), not the player's preferences. The System Common settings, pedals and scale
   tunes are mapped from the manual's parameter list (checked for consistency across 75 copies;
   no System dump was available to verify them byte for byte), and the arpeggio settings are
   inferred. A 10-bit setting and a 26-byte tail at the end are still unidentified (probably

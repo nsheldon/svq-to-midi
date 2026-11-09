@@ -27,50 +27,12 @@ struct TrackColumnTitles {
     var name: String
     var column2: String
     var column7: String
-    /// The seventh column's width ("Bars" is narrow, "Played by" wider).
+    /// The seventh column's starting width ("Bars" is narrow, "Played by" wider).
     var column7Width: CGFloat = 64
 }
 
-/// A row's cells in fixed columns, shared by the header so the two line up.
-private struct TrackColumns: View {
-    var icon: String?
-    var name: String
-    var column2: String
-    var channels: String
-    var sound: String
-    var notes: String
-    var keys: String
-    var column7: String
-    var contents: String
-    var column7Width: CGFloat = 64
-    var isHeader = false
-
-    var body: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: 6) {
-                Image(systemName: icon ?? "music.note.list")
-                    .foregroundStyle(.secondary)
-                    .frame(width: 16)
-                    .opacity(icon == nil ? 0 : 1)
-                Text(name).fontWeight(isHeader ? .regular : .medium)
-            }
-            .frame(width: 128, alignment: .leading)
-            Text(column2).frame(width: 64, alignment: .leading)
-            Text(channels).frame(width: 52, alignment: .leading)
-            Text(sound).frame(minWidth: 120, maxWidth: .infinity, alignment: .leading)
-                .layoutPriority(1)
-            Text(notes).frame(width: 52, alignment: .trailing)
-            Text(keys).frame(width: 64, alignment: .leading)
-            Text(column7).frame(width: column7Width, alignment: .leading)
-            Text(contents).frame(minWidth: 100, maxWidth: .infinity, alignment: .leading)
-        }
-        .lineLimit(1)
-        .truncationMode(.tail)
-        .monospacedDigit()
-    }
-}
-
-/// A list of tracks, each draggable to the Finder or a DAW as a MIDI file.
+/// A table of tracks, each draggable to the Finder or a DAW as a MIDI file. The columns can be
+/// resized by dragging their dividers in the header.
 struct TrackList: View {
     @EnvironmentObject private var model: AppModel
     let item: SVQItem
@@ -85,29 +47,79 @@ struct TrackList: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 8)
-            List {
-                Section {
-                    ForEach(rows) { row in
-                        TrackColumns(icon: row.icon, name: row.name, column2: row.column2, channels: row.channels,
-                                     sound: row.sound, notes: row.notes, keys: row.keys, column7: row.column7,
-                                     contents: row.contents, column7Width: titles.column7Width)
-                            .foregroundStyle(row.isDimmed ? .secondary : .primary)
-                            .padding(.vertical, 2)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .contentShape(Rectangle())
-                            .help(row.help)
-                            .midiDrag(isEnabled: row.isDraggable) { model.dragFile(row.content, of: item) }
+            table
+        }
+    }
+
+    /// Table rows gained `.draggable` in macOS 14 (the method confirmed with the Finder and Logic);
+    /// macOS 13 uses an item provider. Rows that can't be dragged (the Tempo and Beat tracks) give none.
+    @ViewBuilder
+    private var table: some View {
+        if #available(macOS 14, *) {
+            Table(of: TrackRowData.self) {
+                columns
+            } rows: {
+                ForEach(rows) { row in
+                    if row.isDraggable {
+                        TableRow(row).draggable(model.dragFile(row.content, of: item))
+                    } else {
+                        TableRow(row)
                     }
-                } header: {
-                    TrackColumns(icon: nil, name: titles.name, column2: titles.column2, channels: "Ch",
-                                 sound: "Sound", notes: "Notes", keys: "Keys", column7: titles.column7,
-                                 contents: "Other events", column7Width: titles.column7Width, isHeader: true)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
             }
-            .listStyle(.inset(alternatesRowBackgrounds: true))
+        } else {
+            Table(of: TrackRowData.self) {
+                columns
+            } rows: {
+                ForEach(rows) { row in
+                    TableRow(row).itemProvider {
+                        row.isDraggable ? model.dragFile(row.content, of: item).itemProvider() : nil
+                    }
+                }
+            }
         }
+    }
+
+    @TableColumnBuilder<TrackRowData, Never>
+    private var columns: some TableColumnContent<TrackRowData, Never> {
+        TableColumn(titles.name) { row in
+            HStack(spacing: 6) {
+                Image(systemName: row.icon)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 16)
+                Text(row.name).fontWeight(.medium)
+            }
+            .cell(row)
+        }
+        .width(min: 80, ideal: 128)
+        TableColumn(titles.column2) { row in Text(row.column2).cell(row) }
+            .width(min: 40, ideal: 64)
+        TableColumn("Ch") { row in Text(row.channels).cell(row) }
+            .width(min: 24, ideal: 52)
+        TableColumn("Sound") { row in Text(row.sound).cell(row) }
+            .width(min: 60, ideal: 220)
+        TableColumn("Notes") { row in
+            Text(row.notes).frame(maxWidth: .infinity, alignment: .trailing).cell(row)
+        }
+        .width(min: 36, ideal: 52)
+        TableColumn("Keys") { row in Text(row.keys).cell(row) }
+            .width(min: 36, ideal: 64)
+        TableColumn(titles.column7) { row in Text(row.column7).cell(row) }
+            .width(min: 36, ideal: titles.column7Width)
+        TableColumn("Other events") { row in Text(row.contents).cell(row) }
+            .width(min: 80, ideal: 240)
+    }
+}
+
+private extension View {
+    /// A track table cell: one line, dimmed for tracks the instrument didn't play, with the row's
+    /// details as its tooltip.
+    func cell(_ row: TrackRowData) -> some View {
+        lineLimit(1)
+            .truncationMode(.tail)
+            .monospacedDigit()
+            .foregroundStyle(row.isDimmed ? .secondary : .primary)
+            .help(row.help)
     }
 }
 

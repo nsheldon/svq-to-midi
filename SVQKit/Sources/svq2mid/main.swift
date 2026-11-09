@@ -4,7 +4,7 @@ import SVQKit
 let usage = """
 Usage: svq2mid [options] <file.svq | folder>...
 
-Converts Roland XP-50/60/80 and Fantom-X SVQ sequence files to Standard MIDI Files.
+Converts Roland XP-50/60/80, Fantom, Fantom-S, Fantom-X and MC-80 SVQ sequence files to Standard MIDI Files.
 
 Options:
   -o, --output <dir>     Write MIDI files to <dir> (default: next to each SVQ file)
@@ -12,12 +12,14 @@ Options:
       --no-patches       Do not add Bank Select / Program Change for each Part
       --no-mixer         Do not add Part level/pan/reverb/chorus controllers
       --sysex            Add the instrument setup as System Exclusive (XP: the Performance;
-                         Fantom-X: every Part's saved Patch/Rhythm Set, Rhythm Sets unverified)
+                         Fantom-S/X: every Part's saved Patch/Rhythm Set, Rhythm Sets unverified)
                          on a separate setup track: solo it for the first play, then mute it
       --lead-in <n>      Insert <n> empty measures before the song (default 0)
       --slot <id>=<A-D>  Expansion board SR-JV80-<id> was in slot A-D (repeatable)
       --no-patterns      Do not write separate files for patterns
       --no-off-tracks    Leave out tracks whose Output is set to Off
+      --controllers      With --sysex, also send the player's controller and keyboard settings
+                         saved with the song (XP: System preferences; Fantom: Zones, Controller)
       --file-names       Name output files after the SVQ file instead of the song name
   -h, --help             Show this help
 """
@@ -57,6 +59,7 @@ while let arg = args.popFirst() {
         options.expansionSlots[board] = "ABCD".distance(from: "ABCD".startIndex, to: slot)
     case "--no-patterns": writePatterns = false
     case "--no-off-tracks": options.includeOffTracks = false
+    case "--controllers": options.addControllerSetup = true
     case "--file-names": useFileNames = true
     default:
         if arg.hasPrefix("-") { fail("Unknown option \(arg)\n\n\(usage)") }
@@ -92,7 +95,7 @@ for url in files {
     do {
         let svq = try SVQFile(contentsOf: url)
         if infoOnly {
-            print("\(url.lastPathComponent): \"\(svq.songName)\" [\(svq.model), \(svq.variant.displayName)]")
+            print("\(url.lastPathComponent): \"\(svq.songName)\" [\(svq.model), \(svq.formatDescription)]")
             print(String(format: "  %.1f BPM%@, %@, %d notes, %d ticks/quarter, %d:%02d",
                          svq.initialBPM, svq.hasTempoChanges ? " (with tempo changes)" : "",
                          svq.initialTimeSignature.displayString, svq.noteCount, svq.resolution,
@@ -108,7 +111,7 @@ for url in files {
             if let perf = svq.setup {
                 let boards = svq.performance?.expansionBoards ?? []
                 let quotedName = perf.name.isEmpty ? "" : " \u{201C}\(perf.name)\u{201D}"
-                let heading = perf.instrument.contains("mode") ? perf.instrument : "\(perf.instrument) Performance"
+                let heading = perf.instrument.contains("mode") ? perf.instrument : "\(perf.instrument) \(perf.kind)"
                 print("  \(heading)\(quotedName):")
                 if let note = perf.note { print("  (\(note))") }
                 for part in perf.parts {
@@ -125,6 +128,9 @@ for url in files {
                 }
             }
             for warning in svq.warnings { print("  warning: \(warning)") }
+            if let audio = SVQFile.audioTrackFile(forSongAt: url) {
+                print("  note: its Fantom-X audio tracks (\(audio.lastPathComponent)) aren't converted")
+            }
             continue
         }
 
@@ -144,6 +150,9 @@ for url in files {
             }
         }
         for warning in svq.warnings { print("  warning: \(warning)") }
+        if let audio = SVQFile.audioTrackFile(forSongAt: url) {
+            print("  note: its Fantom-X audio tracks (\(audio.lastPathComponent)) aren't converted")
+        }
     } catch {
         failures += 1
         FileHandle.standardError.write(Data("\(url.lastPathComponent): \(error.localizedDescription)\n".utf8))

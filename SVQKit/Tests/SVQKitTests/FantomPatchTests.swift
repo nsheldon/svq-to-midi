@@ -84,12 +84,29 @@ final class FantomPatchTests: XCTestCase {
             track.contains { if case .meta(0x03, let b) = $0.message { return String(decoding: b, as: UTF8.self) == SVQConverter.setupTrackName } else { return false } }
         })
         let setupDumps = setup.compactMap { e -> Int? in if case .sysEx = e.message { return e.tick } else { return nil } }
-        // First the Performance (55 messages to the temporary Performance, 10 00 xx 00), then the sounds.
-        let performance = fantom.performanceSysExMessages()
-        XCTAssertEqual(performance.count, 55)
-        XCTAssertEqual(setupDumps.count, performance.count + dumps.count)
+        // First the Performance (to the temporary Performance, 10 00 xx 00), then the sounds. Without the
+        // controller option, the 16 Zones and the Controller are left out: 38 of its 55 sections.
+        let performance = fantom.performanceSysExMessages(includeControllers: false)
+        XCTAssertEqual(performance.count, 38)
+        XCTAssertEqual(fantom.performanceSysExMessages().count, 55)
+        XCTAssertEqual(setupDumps.count, 1 + performance.count + dumps.count)
         let setupMessages = setup.compactMap { e -> [UInt8]? in if case .sysEx(let b) = e.message { return b } else { return nil } }
-        XCTAssertEqual(Array(setupMessages.prefix(55)), performance)
+        // The Setup comes first: a Fantom-X song sends its whole Setup section (52 bytes) to 01 00 00 00.
+        XCTAssertEqual(setupMessages[0], try XCTUnwrap(fantom.setupSysExMessages().first))
+        XCTAssertEqual(Array(setupMessages[0][6 ..< 10]), [0x01, 0x00, 0x00, 0x00])
+        XCTAssertEqual(setupMessages[0].count - 12, 52)
+        XCTAssertEqual(setupMessages[0][10], 1) // Sound Mode PERFORM
+        XCTAssertEqual(Array(setupMessages.dropFirst().prefix(38)), performance)
+        // With it, all 55.
+        var withControllers = options
+        withControllers.addControllerSetup = true
+        let full = try MIDIReader(data: SVQConverter.midiData(for: svq, options: withControllers))
+        let fullSetup = try XCTUnwrap(full.tracks.first { track in
+            track.contains { if case .meta(0x03, let b) = $0.message { return String(decoding: b, as: UTF8.self) == SVQConverter.setupTrackName } else { return false } }
+        })
+        let fullSysEx = fullSetup.compactMap { e -> [UInt8]? in if case .sysEx(let b) = e.message { return b } else { return nil } }
+        XCTAssertEqual(fullSysEx.count, setupMessages.count + 17)
+        XCTAssertEqual(Array(fullSysEx.dropFirst().prefix(55)), fantom.performanceSysExMessages())
         XCTAssertTrue(performance.allSatisfy { $0[6] == 0x10 && $0[7] == 0x00 })
         XCTAssertEqual(setupDumps.min(), 0)
         XCTAssertEqual(dumps.map(\.0), dumps.map(\.0).sorted())

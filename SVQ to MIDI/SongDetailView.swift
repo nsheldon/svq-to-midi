@@ -64,9 +64,21 @@ struct SongDetailView: View {
                     Text(item.title)
                         .font(.largeTitle.weight(.semibold))
                         .textSelection(.enabled)
-                    Text([item.fileName, svq.variant.displayName, svq.comment].filter { !$0.isEmpty }.joined(separator: "  ·  "))
+                    Text([item.fileName, svq.formatDescription].filter { !$0.isEmpty }.joined(separator: "  ·  "))
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
+                    if !svq.comment.isEmpty {
+                        // The comment line saved with the song on the instrument (Roland's demo
+                        // songs carry a copyright notice here).
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Text("Song comment")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(svq.comment)
+                                .textSelection(.enabled)
+                        }
+                        .help("The comment saved with the song on the instrument")
+                    }
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 6) {
@@ -79,6 +91,12 @@ struct SongDetailView: View {
             ForEach(svq.warnings, id: \.self) { warning in
                 Label(warning, systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
+                    .font(.callout)
+            }
+            if let audio = item.audioTrackFile {
+                Label("The song\u{2019}s Fantom-X audio tracks (\(audio.lastPathComponent)) aren\u{2019}t exported.",
+                      systemImage: "waveform")
+                    .foregroundStyle(.secondary)
                     .font(.callout)
             }
         }
@@ -279,7 +297,7 @@ struct PartsTable: View {
     private func headerText(_ setup: PerformanceSetup) -> String {
         if setup.instrument.contains("Patch mode") { return setup.instrument }
         if setup.name.isEmpty { return setup.instrument }
-        return "\(setup.instrument) Performance \u{201C}\(setup.name)\u{201D}"
+        return "\(setup.instrument) \(setup.kind) \u{201C}\(setup.name)\u{201D}"
     }
 
     private func mixer(_ row: PartRow, _ value: String) -> some View {

@@ -6,7 +6,9 @@ struct AboutView: View {
         let info = Bundle.main.infoDictionary
         let short = info?["CFBundleShortVersionString"] as? String ?? "1.0"
         let build = info?["CFBundleVersion"] as? String ?? "1"
-        return "Version \(short) (\(build))"
+        // "beta 2" while in beta (Info.plist; empty for a final release).
+        let label = (info?["SVQReleaseLabel"] as? String).map { $0.isEmpty ? "" : " \($0)" } ?? ""
+        return "Version \(short)\(label) (\(build))"
     }
 
     private var copyright: String {
@@ -36,7 +38,7 @@ struct AboutView: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
 
-                Text("Converts Roland XP-50, XP-60, XP-80 and Fantom-X sequencer songs (.SVQ) to Standard MIDI Files, with each Part\u{2019}s patch selection from the song\u{2019}s saved Performance.")
+                Text("Converts Roland XP-50, XP-60, XP-80, Fantom, Fantom-S, Fantom-X and MC-80 sequencer songs (.SVQ) to Standard MIDI Files, with each Part\u{2019}s patch selection from the song\u{2019}s saved Performance.")
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 8)

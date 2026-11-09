@@ -53,6 +53,21 @@ enum FantomPerformanceLayout {
         F(1, 7), F(1, 7), F(1, 7), F(1, 7), F(2, 8), F(1, 1), F(1, 2),
     ]
 
+    /// Setup (01 00 00 00): Sound Mode, the selected Performance and keyboard and pad Patches, effect switches, transpose, arpeggio, rhythm and chord settings (51 parameters, 52 SysEx bytes, 213 bits)
+    static let setup: [FantomParameter] = [
+        F(1, 3), F(1, 7), F(1, 7), F(1, 7), F(1, 7), F(1, 7), F(1, 7), F(1, 7), F(1, 7), F(1, 7),
+        F(1, 1), F(1, 1), F(1, 1), F(1, 1), F(1, 1), F(1, 1), F(1, 1), F(1, 1), F(1, 4, c), F(1, 3, c),
+        F(1, 3), F(1, 2), F(1, 1), F(1, 7), F(1, 7), F(1, 1), F(1, 7), F(1, 7), F(1, 7), F(1, 3, c),
+        F(1, 1), F(1, 7), F(1, 7), F(1, 1), F(1, 7), F(2, 8), F(1, 1), F(1, 7), F(1, 7), F(1, 7),
+        F(1, 1), F(1, 7), F(1, 6), F(1, 1), F(1, 1), F(1, 1), F(1, 1), F(1, 7), F(1, 1), F(1, 2),
+        F(1, 6),
+    ]
+
     /// Index in `part` of Decay Time Offset (00 21), which is stored at the end of the Part.
     static let partDecayTimeOffsetIndex = 32
+
+    /// The Fantom-S's Setup and Performance Controller are the first parameters of `setup` and
+    /// `controller` (its Parameter List; the Fantom-X added Rolled Chord and Arpeggio Step).
+    static let fantomSSetupCount = 46
+    static let fantomSControllerCount = 85
 }

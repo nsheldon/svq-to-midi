@@ -23,12 +23,17 @@ public struct SVQConversionOptions: Equatable, Codable, Sendable {
     public var expansionSlots: [Int: Int] = [:]
     /// Include the data of tracks whose Output is set to OFF (the instrument didn't play them).
     public var includeOffTracks = true
+    /// With `addPerformanceSysEx`, also send the player's controller and keyboard settings saved with
+    /// the song: the XP's System preferences (receive and transmit switches, control channel,
+    /// controller and pedal assignments, keyboard, preview notes, bank select groups, arpeggio) and
+    /// the Fantom Performances' keyboard Zones and Controller sections (pads, D Beam, switches).
+    public var addControllerSetup = false
 
     public init() {}
 
     private enum CodingKeys: String, CodingKey {
         case addPatchSelection, addMixerSettings, addPerformanceSysEx, leadInMeasures, sysExDeviceID,
-             expansionSlots, includeOffTracks
+             expansionSlots, includeOffTracks, addControllerSetup
     }
 
     /// Decodes saved options, using the default for any setting that wasn't saved (so settings
@@ -43,6 +48,7 @@ public struct SVQConversionOptions: Equatable, Codable, Sendable {
         sysExDeviceID = try c.decodeIfPresent(UInt8.self, forKey: .sysExDeviceID) ?? d.sysExDeviceID
         expansionSlots = try c.decodeIfPresent([Int: Int].self, forKey: .expansionSlots) ?? d.expansionSlots
         includeOffTracks = try c.decodeIfPresent(Bool.self, forKey: .includeOffTracks) ?? d.includeOffTracks
+        addControllerSetup = try c.decodeIfPresent(Bool.self, forKey: .addControllerSetup) ?? d.addControllerSetup
     }
 
     /// The slot used for a board, honoring explicit assignments first.
@@ -303,22 +309,45 @@ public enum SVQConverter {
             // XP: the Performance, spaced so the XP can process each message.
             var track = MIDITrackBuilder()
             track.addText(0x03, setupTrackName)
-            track.addText(0x01, "XP-80 Performance \"\(performance.name)\". \(setupTrackNote)")
-            for (i, message) in performance.sysExMessages(deviceID: options.sysExDeviceID).enumerated() {
+            track.addText(0x01, "XP-80 System settings and Performance \"\(performance.name)\". \(setupTrackNote)")
+            // The saved System settings first (Sound Mode, selected Performance, tuning, effect
+            // switches), then the Performance.
+            var system = svq.xpSystem?.sysExMessages(deviceID: options.sysExDeviceID) ?? []
+            if options.addControllerSetup {
+                system += svq.xpSystem?.controllerSysExMessages(deviceID: options.sysExDeviceID) ?? []
+            }
+            for (i, message) in (system + performance.sysExMessages(deviceID: options.sysExDeviceID)).enumerated() {
                 track.addSysEx(message, at: tempo.ticks(microseconds: i * sysExIntervalMicroseconds), priority: .setup)
+            }
+            return (track, false)
+        }
+        if let fa76 = svq.fa76Setup,
+           let messages = fa76.sysExMessages(deviceID: options.sysExDeviceID, includeControllers: options.addControllerSetup),
+           let what = fa76.sysExDescription {
+            // The original Fantom: its Sound Mode, then the saved Multitimbre or Performance, paced
+            // like the Fantom-S/X dumps.
+            var track = MIDITrackBuilder()
+            track.addText(0x03, setupTrackName)
+            track.addText(0x01, "Fantom \(what) (unverified). \(setupTrackNote)")
+            var time = 0
+            for message in messages {
+                track.addSysEx(message, at: tempo.ticks(microseconds: time), priority: .setup)
+                time += message.count * midiByteMicroseconds + fantomDumpGapMicroseconds
             }
             return (track, false)
         }
         if let fantom = svq.fantomPerformance {
             // Fantom-X: every saved sound, each message waiting for the previous one's transmission
             // time plus a processing gap.
-            let messages = fantomSoundMessages(fantom, deviceID: options.sysExDeviceID)
+            let messages = fantomSoundMessages(fantom, deviceID: options.sysExDeviceID,
+                                               includeControllers: options.addControllerSetup)
             if messages.isEmpty { return (nil, false) }
             var track = MIDITrackBuilder()
             track.addText(0x03, setupTrackName)
+            let model = fantom.isFantomS ? "Fantom-S" : "Fantom-X"
             let what = fantom.soundMode == nil || fantom.soundMode == .performance
-                ? "Fantom-X Performance \"\(fantom.name)\" (effects and Part settings unverified), then the Parts' Patches and Rhythm Sets"
-                : "Fantom-X Patch mode keyboard and pad sounds"
+                ? "\(model) Setup, Performance \"\(fantom.name)\" (effects and Part settings unverified), then the Parts' Patches and Rhythm Sets"
+                : "\(model) Setup, then the Patch mode keyboard and pad sounds"
             track.addText(0x01, "\(what) (Rhythm Set data unverified). \(setupTrackNote)")
             var time = 0
             for message in messages {
@@ -371,15 +400,18 @@ public enum SVQConverter {
     static let midiByteMicroseconds = 320
     static let fantomDumpGapMicroseconds = 20_000
 
-    /// For a song saved in Performance mode, the Performance itself (its effects and Part settings;
+    /// The song's Setup (see `FantomPerformance.setupSysExMessages`); then, for a song saved in
+    /// Performance mode, the Performance itself (its effects and Part settings;
     /// unverified, see `FantomPerformance.performanceSysExMessages`); then the saved sound of every
     /// Performance Part (whether or not the song plays it) and of Patch mode's keyboard and pad
     /// parts, as Fantom-X Data Set 1 messages to their temporary areas. The Performance goes first:
     /// its Part settings select each Part's stored sound, which the saved sounds then replace.
-    static func fantomSoundMessages(_ fantom: FantomPerformance, deviceID: UInt8) -> [[UInt8]] {
-        var messages: [[UInt8]] = []
+    static func fantomSoundMessages(_ fantom: FantomPerformance, deviceID: UInt8,
+                                    includeControllers: Bool = false) -> [[UInt8]] {
+        // The Setup first (Sound Mode and selections), whose selections the dumps then replace.
+        var messages = fantom.setupSysExMessages(deviceID: deviceID)
         if fantom.soundMode == nil || fantom.soundMode == .performance {
-            messages += fantom.performanceSysExMessages(deviceID: deviceID)
+            messages += fantom.performanceSysExMessages(deviceID: deviceID, includeControllers: includeControllers)
         }
         for part in fantom.parts {
             if let sound = fantom.savedSound(of: part) {

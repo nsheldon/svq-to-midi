@@ -4,7 +4,8 @@
 #
 #   Tools/release/make-dmg.sh check          is this Mac ready (certificate, notary login)
 #   Tools/release/make-dmg.sh [LABEL]        build build/release/SVQ to MIDI <version>[ LABEL].dmg
-#                                            e.g. make-dmg.sh "beta 1"
+#                                            e.g. make-dmg.sh "beta 2"; without LABEL, the app's
+#                                            SVQReleaseLabel (Info.plist) is used
 #
 # Needs, once:
 #   - a "Developer ID Application" certificate in the Keychain (Xcode › Settings ›
@@ -76,6 +77,9 @@ app="$work/dd/Build/Products/Release/$name.app"
 plist="$app/Contents/Info.plist"
 version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$plist")"
 build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$plist")"
+if [ -z "$label" ]; then
+  label="$(/usr/libexec/PlistBuddy -c 'Print :SVQReleaseLabel' "$plist" 2>/dev/null || true)"
+fi
 
 # What notarization would refuse, said before the wait rather than after it.
 codesign --verify --deep --strict "$app"

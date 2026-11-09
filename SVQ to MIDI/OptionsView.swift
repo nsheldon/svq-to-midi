@@ -10,15 +10,17 @@ struct OptionsView: View {
                 Toggle("Select each Part\u{2019}s patch (Bank Select + Program Change)", isOn: $model.options.addPatchSelection)
                 Toggle("Set each Part\u{2019}s level, pan, reverb and chorus", isOn: $model.options.addMixerSettings)
                 Toggle("Include the instrument\u{2019}s setup as SysEx on a separate setup track", isOn: $model.options.addPerformanceSysEx)
-                Text("XP songs: the Performance, for an XP-50, XP-60 or XP-80. Fantom-X songs: every Part\u{2019}s saved Patch or Rhythm Set plus the Patch-mode sounds, an exact replica of the song\u{2019}s setup (Rhythm Set data is unverified). The song keeps its original timing: solo the setup track and play it through once (a full Fantom-X setup takes about 25 seconds), then mute it and play the song. Fantom-X Parts whose sound is sent this way get no Program Change, which would replace it. Other instruments ignore this data.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .help("Solo the setup track and play it through once, then mute it and play the song.")
+                Toggle("Also include the player\u{2019}s controller and keyboard settings", isOn: $model.options.addControllerSetup)
+                    .disabled(!model.options.addPerformanceSysEx)
+                    .padding(.leading, 20)
+                    .help("XP songs: the System preferences saved with the song (receive and transmit switches, control channel, controller and pedal assignments, keyboard sensitivity, preview notes, bank select groups, arpeggio). Fantom songs: each Performance\u{2019}s keyboard Zones and Controller settings (pads, D Beam, switches). These change how the instrument responds to its own controls and to MIDI; some, such as receive switches, can stop the song\u{2019}s own setup from working.")
                 Stepper(value: $model.options.leadInMeasures, in: 0 ... 8) {
                     Text("Lead-in: \(model.options.leadInMeasures) empty measure\(model.options.leadInMeasures == 1 ? "" : "s")")
                 }
                 .help("Empty measures before the song give the instrument time to select each Part\u{2019}s patch before the first notes.")
             } header: {
-                Text("Setup data added at the start")
+                Text("Initial song setup data")
             }
 
             Section {

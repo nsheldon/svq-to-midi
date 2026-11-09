@@ -26,3 +26,14 @@ CLAUDE.local.md
 # The promotional website and its upload script (kept local; see CLAUDE.local.md)
 /Website/
 /Tools/website/
+
+# Roland firmware updates (copyrighted; reference only)
+Reference Material/FantomSv109/
+Reference Material/Fantomv120smf/
+Reference Material/Fantomv120fdd/
+Reference Material/*.pdf
+
+# Python environment with the Capstone disassembler (SuperH), for firmware study
+/.venv-re/
+Reference Material/Fantom Lists/dl/
+Reference Material/Fantom-S Lists/dl/

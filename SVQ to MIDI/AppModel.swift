@@ -19,6 +19,8 @@ struct SVQItem: Identifiable {
     let url: URL
     let svq: SVQFile?
     let loadError: String?
+    /// The Fantom-X audio-track file (`.SVA`) beside the song, which isn't converted.
+    var audioTrackFile: URL?
     var status: Status = .ready
 
     var fileName: String { url.lastPathComponent }
@@ -89,7 +91,8 @@ final class AppModel: ObservableObject {
             for file in Self.svqFiles(at: url) where !items.contains(where: { $0.url == file })
                 && !added.contains(where: { $0.url == file }) {
                 do {
-                    added.append(SVQItem(url: file, svq: try SVQFile(contentsOf: file), loadError: nil))
+                    added.append(SVQItem(url: file, svq: try SVQFile(contentsOf: file), loadError: nil,
+                                         audioTrackFile: SVQFile.audioTrackFile(forSongAt: file)))
                 } catch {
                     added.append(SVQItem(url: file, svq: nil, loadError: error.localizedDescription))
                 }

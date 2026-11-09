@@ -1,8 +1,9 @@
-# Roland SVQ sequence format (XP-50/60/80 and Fantom-X)
+# Roland SVQ sequence format (XP-50/60/80 and Fantom-S/X)
 
 This describes the `.SVQ` song files written by the Roland XP-50, XP-60 and XP-80 sequencer
 (model string `XP-80 0105 1.7`, signature `SV00`) and by the Fantom-X6/X7/X8 (model string
-`MC-80      1.1.1`, signature `SV03`). The Fantom-X variant is covered in its own section
+`MC-80      1.1.1`, signature `SV03`) and the Fantom-S (model string `MC-80      1.2`, also
+`SV03`), with notes on the original Fantom's and MC-80's `SV02`. The Fantom-S/X variant is covered in its own section
 at the end; everything before it describes the XP. Roland never published the format. It was
 reverse-engineered by comparing SVQ files with MIDI files the XP-80 exported from the same
 songs, and checking against the XP-80 Owner's Manual (MIDI Implementation chapter).
@@ -231,9 +232,196 @@ carries only `SYSa`.
   settings (Groove template number, strengths) are also candidates.
 
 No XP-80 System bulk dump was available, so this is checked by consistency, not byte for byte.
-The converter doesn't use these blocks.
 
-## Fantom-X variant (`SV03`)
+With the SysEx option, the converter sends the part of these settings that shapes the song's
+sound, before the Performance: System Common 00-0A in one message (Sound Mode, Performance
+Number, Patch mode's Patch, Master Tune, Scale Tune switch, EFX/Chorus/Reverb switches) and, when
+the Scale Tune switch is on, the 17 Scale Tune sets (00 00 10 00 … 20 00). The player's
+preferences are sent only with the controller option: System Common 0B-51 (receive and transmit
+switches, control channel, controller and pedal assignments, keyboard, preview notes, Bank Select
+Groups) as one message from bit 37, then 52-5F (Pedal 3-4 and the arpeggio, from bit 336; just
+52-5D from a `SYSa` block). Some, such as Receive Bank Select, could stop the converted song's own
+setup from working, which is why they're optional.
+
+## Format versions and firmware
+
+The two digits after `SV` are a format version:
+
+| Signature | Written by | Event records | After the events |
+|---|---|---|---|
+| `SV00` | XP-50, XP-60, XP-80 | 8 bytes, 96 ticks a quarter | u16 lengths (see the file layout) |
+| `SV02` | original Fantom (FA-76), MC-80 | 12 bytes, 480 ticks a quarter, as in `SV03` | u16 lengths, as in `SV00` |
+| `SV03` | Fantom-S, Fantom-X | 12 bytes, 480 ticks a quarter | u32 lengths |
+
+Roland's firmware shows this. Neither update was decompiled; only data in them was read.
+
+- **Fantom (FA-76) 1.20** (the SysEx-in-SMF update, 32 files; the floppy update holds the same
+  blocks): each Data Set message carries 56 bytes packed into 64 seven-bit bytes, a byte of top bits
+  (bit *k* for byte *k*) before each 7. The image holds `MIGT4` blocks, each a version, unpacked
+  size, packed size and a zlib stream (the loader includes zlib 1.1.3). The 5.6 MB main program
+  lists `SV02` and `SV00` as the song signatures it accepts, and holds three `SV02` songs: its
+  blank new-song template (model `MC-80 0001  1.00`), its demo song "Fantom Medley" (model
+  `MC-80 0.47 1.3`) and an MC-80 demo song, "Demo for VE-GS" (model `MC-80 0118 1.0`).
+- **Fantom-S 1.09** (`fans.bin`): `SUBHEAD FILE` records (u32 size at +12, path at +16, data at
+  +0x110) holding five `SV03` demo songs, samples, panel images and `FANS.PRG`. The program is
+  LZSS-compressed after a header (`Roland FNTMS application program`, `LLZ98L016`, u32 unpacked
+  size, date): flag bytes read from bit 0, 1 = literal; a reference is 2 bytes, position = byte 1 |
+  (byte 2 & 0xF0) << 4 in a 4096-byte ring, length = (byte 2 & 0x0F) + 3; the ring starts at
+  0xE2F (not the textbook 0xFEE), established from the new-song template it holds. It lists
+  `SV00`, `SV02` and `SV03` as the signatures it loads, and its template is `SV03`.
+
+In `SV02` the header is laid out exactly as in `SV03` (the same 0xB9-byte header with the song
+length, track masks, Output bytes, Loop and RPS chunks), and the records are the same. After the
+events come the XP's u16 lengths: the rest of the file, an empty length-prefixed block (40 bytes
+on the XP), the pattern-name table, and the `SVD1` directory's length. The MC-80 saves no sound
+settings (its sounds were on a VE-GS board). The original Fantom saves an `SVD1` directory with
+model `NEXY` and three blocks: `STPa` (Setup, one 12-byte record), `PRFa` (Performance, 1126
+bytes) and `MLTa` (Multitimbre, 954 bytes). It saves no Patches with the song, so like the XP's,
+its songs select sounds by Bank Select and Program Change.
+
+The blocks pack the parameters of the Fantom's own MIDI Implementation map most-significant-bit
+first, like the Fantom-S/X's, after the same 16-byte block header:
+
+- `STPa` (Setup): Sound Mode (3 bits: 0 PERFORM, 1 PATCH, 2 MULTI, 3 GM1, 4 GM2, 5 GS; a different
+  order from the Fantom-S/X's), then 7-bit Bank Select MSB, LSB and program for the Multitimbre,
+  the Performance and the Patch, then the effect switches, transpose and octave shift.
+- `PRFa` and `MLTa` begin with the 12-character name. Both hold 16 Parts at **bit 3026**, 288
+  bits each (Part 16 runs 2 bits past the end of `MLTa`), in the map's Part order: receive
+  channel (4), receive switch (1), receive MIDI 1 and 2 (1 each), Bank Select MSB, LSB, program,
+  level, pan (7 each), coarse and fine tune, mono/poly, legato, bend range, portamento switch and
+  time (8), cutoff/resonance/attack/release offsets, octave shift (3 bits, 4 = 0), velocity sense,
+  key range and fade widths, mute, dry, chorus send (bit 149), reverb send (bit 156), output…
+  Worked out from the 16 preset Multitimbres and 64 preset Performances stored in the same form in
+  the Fantom 1.20 firmware (every Part's channel, Bank Select and key range is plausible, and
+  "GM2 Template" has GM2 Patches with a GM2 kit on Part 10) and from the demo song, whose own SysEx
+  sets Sound Mode = MULTI and Part sounds at the map's Part offsets.
+
+Banks: MSB 87 LSB 0 = USER Patches, 71-75 = PR-A to PR-E; MSB 86 LSB 0 = USER Rhythm Sets, 71 =
+PRST; MSB 121/120 = GM2 Patches/Rhythm Sets; MSB 93/92 = SRX. Factory names come from the
+Fantom's MIDI Implementation (Patch List and Rhythm Set List): all 640 preset Patch names were
+found in the firmware's preset Patches (three of them with a double space the printed list
+loses), and its GM2 list differs from the Fantom-X's in two names (slot 13 "Wurly", 104
+"Strings"). User Patches aren't saved with the song, so they're shown by number only.
+
+**The whole record**: both records hold the map's sections, each starting on a byte boundary, in
+this order: Common (44 bytes), MFX 1, 2, 3 (78 each), Chorus (26), Reverb (42), MIDI × 16 (2
+each), Part × 16 (36 each, after 2 undocumented bits, hence bit 3026), and in the Performance
+also Zone × 16 (9 each) and Controller (28). Parameters use the map's bit widths, MSB first, and
+narrow 64-centered parameters are stored re-centered, as on the Fantom-S/X. That accounts for
+exactly 954 (Multitimbre) and 1126 (Performance) bytes, and across the firmware's 80 preset
+records and the demo song all 118,208 decoded values are within the map's ranges. The
+Multitimbre's sections are the Performance's (Common, MFX and Chorus are identical in the map; the
+Reverb, MIDI and Part pages don't parse cleanly but agree where they do). One slot doesn't hold
+what the map puts there: each Part's Decay Time Offset reads 126 in 940 of the 1024 preset Parts
+and 2 in the rest, matching the Part's 2 lead bits (`11` or `10`, the latter in five template-like
+Performances), so it is something undocumented; the converter sends 64 (no offset) instead.
+
+With the SysEx option, the converter sends the Setup (`01 00 00 00`: Sound Mode first, as Roland's
+demo song itself does, then the selected Multitimbre, Performance and Patch, effect switches,
+transpose and octave shift; its map heading shares a line with another table, so its 15
+parameters are written into `gen_fa76_layout.py` by hand), then the saved Multitimbre to the temporary Multitimbre (`19 00 xx 00`) or the
+Performance to the temporary Performance (`10 00 xx 00`), model ID `00 10`. **Unverified**: no
+Fantom dump was available to compare with. The tables are generated by
+`Reference Material/Fantom Lists/gen_fa76_layout.py` from the map (`parse_fa76_map.py`).
+No MIDI export of any `SV02` song was available, so `SV02` conversions are checked for
+consistency (every record type known, every note converted), not against the instrument.
+
+Any other version is read with whichever record layout fits its data best (the share of records
+with a known type, and the song's end record), with a warning; its sound settings are decoded only
+if its directory names data the decoder knows (`XP50`/`XP60`/`XP80`, or `FANS` for the
+Fantom-S/X). The pattern-name table is used only if its entries fill it exactly and each names a
+pattern in the file.
+
+## Fantom-S/X variant (`SV03`)
+
+The Fantom-S writes the same format as the Fantom-X. Roland's five Fantom-S demo songs (inside
+the Fantom-S 1.09 system update) have model `MC-80      1.2`, 480 ticks a quarter, and the same
+`SVD1` blocks with the same record sizes (`PRFa` 1220, `PATa` 664, `RHYa` 10928 bytes), so they
+decode completely with everything below: names, Parts, saved Patches. No Fantom-S MIDI export of
+the demo songs was available to compare the conversions with. The rest of this section was worked
+out on Fantom-X files.
+
+The Fantom-S/S88 Parameter List (MIDI Implementation 1.00) gives the same Model ID (`00 6B`), the
+same addresses and the same sections as the Fantom-X's, with three differences:
+
+- **Setup** (`01 00 00 00`) is 47 bytes (46 parameters, 196 bits): the Fantom-X's without its last
+  five (two reserved, Rolled Chord, Rolled Chord Type, Arpeggio Step). Its `16` is Arp/Ptn Switch,
+  reserved on the Fantom-X. The `STPa` record is 32 bytes (34 on the Fantom-X), which is how the
+  decoder tells the two apart (`FantomPerformance.isFantomS`). Its first 196 bits hold the Setup:
+  all 46 values are in range in the five demo songs. The 60 bits left over match what Fantom-X
+  songs hold from `2F` on when Rolled Chord is off.
+- **Performance Controller** is 86 bytes (85 parameters): the Fantom-X's without Rolled Chord and
+  Rolled Chord Type. Arp/Ptn Switch, Pad Set and Pad Base Note fill slots that are reserved on the
+  Fantom-X, and a few assign ranges are shorter. Every stored width matches, so the Performance
+  record (1220 bytes) is the same, its Controller ending 3 bits earlier.
+- **Factory sounds**: PR-A to PR-E (87/64-68), plus PR-F (87/69, 8 Patches) on the Fantom-S88
+  only; 32 PRST Rhythm Sets; no PR-G/H/I and no sample banks. 15 names in PR-A to PR-E and PR-F
+  006-008 differ from the Fantom-X's ("FS Rhodes" for "FS 70'EP", …), and so do one GM2 Patch ("60's Rhodes") and one GM2
+  kit ("GM2 ORCHSTRA"). `FantomSPatchNames.swift` is generated from the Fantom-S Sound List
+  (`Reference Material/Fantom-S Lists/gen_fantom_s.py`), spelled as the 1.09 program stores them.
+
+The demo songs also have one more block, `MSEa` (14 bytes, the same in all five). It decodes as
+System Mastering (`02 00 02 00`, all 18 parameters in range), but it isn't used. In two of the
+demos, Parts 11-16 select PR-A 001 "So true..." while their saved Patch is named "St.Concert";
+the saved Patch is what plays and what the converter sends.
+
+**Fantom-X system versions.** Songs saved by Fantom-X system 1.0x and by 2.x (the Audio Track
+Expansion) are the same format. Fantom-X song 8 was saved in February 2004, under 1.0x. Four other
+songs must have been saved under 2.x: songs 2, 6 and 7 select PR-I Patches (87/72), which came
+with 2.0, and song 9 has an audio track. All of them have the same model string (`MC-80      1.1.1`,
+evidently the sequencer engine's version, not the system's), the same 17 `SVD1` blocks with the
+same record counts and sizes, and the same 34-byte Setup, Rolled Chord and Arpeggio Step included.
+The bits where song 8 differs from the four are ordinary settings (Voice Reserve, the keyboard
+Patch), not a version mark. What 2.x adds is content, which the decoder already handles:
+
+- PR-I Patches (87/72) and the USAM/CSAM sample Patch banks (MSB 64/65).
+- **Audio tracks**, saved beside the song in a file with the same name and the extension `.SVA`
+  (see "Audio tracks (`.SVA`)" below). The `.SVQ` itself shows no trace of them.
+
+### Audio tracks (`.SVA`)
+
+Fantom-X system 2.x (the Audio Track Expansion) adds eight stereo audio tracks to the sequencer.
+When a song has any, saving it also writes a file with the song's name and the extension `.SVA`
+(Audio Track Expansion Addendum, "Saving your audio tracks"). An audio track holds no audio:
+it holds *sample events*, each saying "play User (or Card) sample number x here" (up to 256 per
+track, one sounding at a time), and the samples stay in the instrument's sample memory and the
+card's `ROLAND/SMPL` folder. The converter doesn't read `.SVA` files; the app and `svq2mid` only
+note that a song has one.
+
+Only one `.SVA` was available (Fantom-X song 9: one audio track with one event), so the layout
+below is a first reading. Integers are big-endian.
+
+| Chunk | Bytes | Value in song 9 | Meaning |
+|---|---|---|---|
+| `SThd` | 4 + u32 | `SThd`, `00 00 00 44` | File header, 68 bytes of data |
+| | 4 | `01 08 00 08` | Probably a version (1) and the track count (8) |
+| | 64 | zeros | Unused here |
+| `STrk` × 8 | 4 + u32 | `STrk`, `00 00 00 28` (used) / `00 00 00 1C` (empty) | One per audio track: 24 bytes of settings + 12 per event, plus this u32 |
+| | u32 | `00 00 00 18` | Size of the settings (24) |
+| | 2 | `02 01` | Unknown, the same on every track |
+| | u16 | `00 00` … `00 07` | Track number, 0-7 |
+| | 12 | `Card 0549` / spaces | Track Name (up to 12 characters); the used track carries its sample's name |
+| | 1 | `03` | Probably Output Assign (MFX 1-3, A, B, MON: 3 = A) |
+| | 1 | `4A` (74); empty tracks `64` (100) | Track Level, 0-127 |
+| | 1 | `40` | Track Pan, 64 = center (L64-63R) |
+| | 1 | `00` | Probably Track Reverb Send Level |
+| | 1 | `00` | Probably Track Chorus Send Level |
+| | 1 | `40` | Probably Audio Track Key Shift, 64 = 0 (-24 to +24) |
+| | 2 | `FF FF` | Unknown (solo/mute switches?) |
+| | 12 each | `00 00 3C 00  AD 00 00 03  02 25  02 26` | Sample events |
+
+Level and Pan are clear (the used track's level is the only value off its default). The other
+settings are placed by matching the Addendum's Audio Track Mixer list (Level, Pan, Rev, Cho,
+Solo, Mute, Output Assign, Key) with the default values. In the one event, `00 00 3C 00` is
+15360, bar 9 at 480 ticks a quarter in 4/4, so probably the event's position in ticks; `02 25` is
+549, matching the track name "Card 0549", so probably the Card sample's number, with `02 26`
+(550) perhaps its 1-based number or an end marker; `AD 00 00 03` is unknown (an event can start
+playing partway through its sample, so possibly an offset or a length). A second song with audio
+tracks would settle these.
+
+`PCMa` (18 one-byte records: Parts 1-16, then the Patch-mode keyboard and pad) and `PFMa` (one
+byte) look like flags, perhaps "edited", for the saved Patches and the Performance: `PFMa` is 0
+only in the song saved in Patch mode. They don't follow the system version either.
 
 The Fantom-X uses the MC-80 sequencer engine. Its files have the same overall layout as the
 XP's, widened for 480-tick resolution, and were checked the same way: decoding three Fantom-X
@@ -362,8 +550,10 @@ templates; the best other order scores 96/27). **Unverified:** no Fantom-X Perfo
 available. The `prf_*.mid` files beside the songs are dump *requests* (RQ1); `prf_all_.mid` asks
 for the temporary Performance and its 16 Part Patches, so capturing a Fantom-X's reply to it would
 give the byte-exact reference. With the SysEx option on, the converter sends this Performance
-(55 Data Set 1 messages to the temporary Performance, `10 00 xx 00`, in the order stored)
-before the Parts' saved sounds, and says in the setup track that it is unverified.
+(Data Set 1 messages to the temporary Performance, `10 00 xx 00`, in the order stored) before the
+Parts' saved sounds, and says in the setup track that it is unverified. The 16 Zones and the
+Controller (keyboard ranges, pads, D Beam, switches) are sent only with the controller option: 38
+messages without it, 55 with it (a Fantom-S song's Controller message is 2 bytes shorter). The original Fantom's Performance is treated the same way.
 
 A Fantom-X Part stores its Bank Select directly, so no group-to-bank table is needed:
 
@@ -421,6 +611,10 @@ D Beam and knob selects, the arpeggio, rhythm pattern and chord settings, part s
 Chord and Arpeggio Step. The last 59 bits are undocumented; they take one of two patterns, the
 second exactly when Rolled Chord is off. Everything after the sound selections is inferred
 from the map order and value ranges.
+
+With the SysEx option, a Fantom-X song's whole Setup section (52 bytes) is sent to `01 00 00 00`
+before the Performance; the dumps that follow replace the Performance and Patches it selects. A
+Fantom-S song's 47-byte Setup is sent the same way (see "Fantom-S/X variant").
 
 A song saved in **Patch mode** plays the keyboard Patch and pad sound rather than the
 Performance. Those are records 17 and 18 of `PATa`/`RHYa`: for example, Fantom-X song 8's keyboard

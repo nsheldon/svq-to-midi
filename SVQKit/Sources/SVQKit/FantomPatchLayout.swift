@@ -117,3 +117,27 @@ enum FantomPatchLayout {
         F(1, 7), F(1, 7), F(1, 7), F(1, 7), F(1, 7), F(1, 1), F(1, 7),
     ]
 }
+
+extension Array where Element == FantomParameter {
+    /// The SysEx data of a section whose parameters are packed MSB-first from `bit` of `record`:
+    /// one byte per parameter, or one nibble per byte for multi-byte parameters, re-centering the
+    /// 64-centered ones. `overrides` replaces parameters' values by index.
+    func sysExData(reading record: [UInt8], at bit: Int, overrides: [Int: Int] = [:]) -> [UInt8] {
+        var reader = BitReader(record, msbFirst: true)
+        reader.position = bit
+        var data: [UInt8] = []
+        for (index, parameter) in enumerated() {
+            var value = reader.read(parameter.bits)
+            if parameter.centered { value += 64 - (1 << (parameter.bits - 1)) }
+            if let override = overrides[index] { value = override }
+            if parameter.sysExBytes == 1 {
+                data.append(UInt8(value & 0x7F))
+            } else {
+                for nibble in (0 ..< parameter.sysExBytes).reversed() {
+                    data.append(UInt8((value >> (nibble * 4)) & 0x0F))
+                }
+            }
+        }
+        return data
+    }
+}
